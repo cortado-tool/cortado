@@ -1,0 +1,364 @@
+
+:host {
+  position: absolute;
+  overflow: hidden;
+}
+
+.variant-miner-mainblock {
+  background-color: var(--box-background-color);
+  max-height: 100%;
+  position: relative;
+  border-left: 1px solid var(--thin-border-color);
+}
+
+.rel-sup-input{
+  width : 225px;
+}
+.form-select-element{
+  padding-left: 2.5px;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  flex-wrap: wrap;
+}
+
+.close-icon{
+  color : white
+}
+
+.badge-position{
+  position: relative;
+  left: -25%;
+  top: -30%;
+  transform: scale(0.6);
+  display: inline;
+}
+
+.badge-close{
+  font-size: 8px;
+}
+
+.badge-close-position:hover{
+  filter: brightness(150%);
+}
+
+.badge-button{
+  padding: 0;
+  font-size: unset;
+  display: contents;
+}
+
+.badge-container{
+  margin-left : -20px;
+}
+
+::ng-deep {
+
+
+  .sup-selector .ngx-slider .ngx-slider-pointer {
+    width: 8px;
+    height: 16px;
+    top: auto; /* to remove the default positioning */
+    bottom: 0;
+    background-color: rgb(215, 213, 213);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+  }
+
+  .sup-selector .ngx-slider .ngx-slider-pointer:after {
+    display: none;
+  }
+
+  .sup-selector .ngx-slider .ngx-slider-bubble {
+    bottom: 14px;
+  }
+
+  .sup-selector .ngx-slider .ngx-slider-tick {
+    width: 3.5px;
+    height: 12px;
+    margin-left: 3px;
+    border-radius: 0;
+    background-color: #d7d5d5;
+    top: -1px;
+    border-top-left-radius: 1px;
+    border-top-right-radius: 1px;
+}
+
+}
+
+.pattern-table-container{
+  color : var(--text-secondary);
+  width : 100%;
+  height : 100%;
+  overflow: auto;
+}
+.form-check-input:focus {
+  border-color: none;
+  outline: 0;
+  box-shadow: none;
+}
+.pattern-table{
+  color : var(--text-secondary);
+  width : 100%;
+}
+
+
+.mining-result-overview{
+  color: whitesmoke;
+  font-size: small;
+  display: flex;
+  flex-direction: column;
+  align-content: space-around;
+  justify-content: flex-end;
+}
+
+
+.variant-header{
+  display: flex;
+  align-content: flex-start !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+}
+
+.input-field{
+  margin-left: 5px;
+  width: -moz-fit-content;
+  width: 55px;
+  border-radius: 3px;
+  background-color: var(--box-background-color);
+  box-shadow: none;
+  border: none;
+  color: whitesmoke;
+}
+
+.input-label{
+  font-size: 0.85rem;
+}
+
+.selected-header-text{
+  color : white;
+}
+
+.header-text-container{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+}
+
+.header-text{
+  padding-left: 5px;
+  padding-right: 5px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.header-text:hover{
+  color : whitesmoke;
+}
+
+.filter-button{
+  padding: 4px 4px 4px 4px;
+  color: whitesmoke;
+  background-color: black;
+  font-size: 13px;
+  box-shadow: none;
+  border-radius: 0px 0px 0px 5px;
+}
+
+.control-button-container{
+  position: absolute;
+  bottom: 0px;
+  z-index:10;
+}
+
+.control-button{
+  color: whitesmoke;
+  background-color: black;
+  font-size: 6px;
+  padding: 2px 4px 2px 3px;
+  box-shadow: none;
+  border-radius: 0px 5px 0px 0px;
+}
+
+.filter-drop-down-content{
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: stretch;
+  align-content: center;
+}
+
+.filter-button-container{
+  position: absolute;
+  top: -4px;
+  right:0px;
+  z-index: 15;
+}
+
+.export-button-container{
+  position: absolute;
+  right: 0;
+  z-index: 15;
+  bottom: 0px;
+}
+
+.export-button{
+  color: whitesmoke;
+  background-color: black;
+  font-size: 6px;
+  padding: 2px 4px 2px 4px;
+  box-shadow: none;
+  border-radius: 5px 0px 0px 0px;
+}
+
+.filter-button:hover{
+  color : white;
+}
+
+.conformance-button{
+  background: inherit;
+  border: none;
+  color: var(--bs-gray-300);
+  cursor:pointer;
+}
+
+.conformance-button:disabled{
+  cursor:default;
+  color: var(--bs-gray-700);
+}
+
+.conformance-button:hover:enabled{
+  color: var(--bs-gray-100);
+}
+
+.filter-option-container{
+  padding: 7px 5px;
+  z-index: 12;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: nowrap;
+  align-content: flex-end;
+  justify-content: space-around;
+}
+.slider-container{
+  width : 25vw;
+  padding: 0px 10px 21px 10px;
+  z-index: 12;
+}
+
+.radio-content{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  padding: 10px;
+  align-items: center;
+  align-content: center;
+}
+
+
+.filter-drop-down{
+  color: white;
+  border-radius: 0.25rem;
+  padding: 5px 10px 30px 10px;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+  overflow-y: scroll;
+  overflow-x: auto;
+}
+
+.filter-toggle-drop-down{
+  padding: 0;
+  color: white;
+  border-radius: 0.25rem;
+  padding: 10px;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+}
+
+.confidence-names{
+  font-size: x-small;
+  font-weight: 400;
+}
+
+.sticky-header-row{
+  position: sticky;
+  top: 0px;
+  z-index : 10;
+  background-color: var(--box-background-color);
+}
+
+.border-lightgrey{
+  border-color: rgb(106, 106, 106, 0.6) !important;
+}
+
+.center-element{
+  border-color: rgb(106, 106, 106, 0.2) !important;
+  border-right-width: 1px;
+  border-left-width: 1px;
+}
+
+
+
+.input-selector{
+  padding: 0.125rem 0.25rem 0.125rem 0.35rem;
+  font-size: 0.85rem;
+  color: whitesmoke;
+  background-color: var(--box-background-color);
+  border: none;
+  margin: 7px;
+  width : 150px;
+}
+
+.variant-miner-submit-button{
+  background: rgb(119, 117, 117);
+  border-radius: 3px;
+}
+
+.form-element{
+  padding: 2.5px;
+}
+
+.mine-config-form{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-content: space-around;
+  height: fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.result-span{
+  user-select: none;
+}
+
+.control-container{
+  width: -moz-fit-content;
+  width: fit-content;
+  height: -moz-fit-content;
+  height: 100%;
+  min-height: 100%;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  color: whitesmoke;
+  border-right: black 0.5px solid;
+  overflow-y: scroll;
+  overflow-x: visible;
+  justify-content: space-between;
+}
+
+
+.variant-miner-container{
+  width : 100%;
+  height : 100%;
+  display : flex;
+  border-bottom: black 0.5px solid;
+}

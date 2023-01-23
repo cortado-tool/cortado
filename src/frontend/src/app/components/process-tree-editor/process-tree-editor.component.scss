@@ -1,0 +1,84 @@
+
+
+:host {
+  position: absolute;
+  overflow:hidden;
+  width : 100%;
+  height : 100%;
+  border-bottom: 1px solid black;
+}
+
+.main-process-tree-editor {
+  background-color: var(--box-background-color);
+  max-height: 100%;
+  position: relative;
+  border-left: 1px solid var(--thin-border-color);
+}
+
+.floating-infobox {
+  background-color: rgba(0, 0, 0, 0.6);
+  position: absolute;
+  font-size: small;
+  bottom: 0;
+  left: 0;
+  text-align: left;
+  cursor: auto;
+  padding: .25rem;
+}
+
+.syntax-info {
+  background-color: rgba(0, 0, 0, 0.4);
+  position: absolute;
+  font-size: small;
+  bottom: 0;
+  left: 0;
+  text-align: left;
+  cursor: auto;
+}
+
+.syntax-info ul {
+  margin-bottom: 0;
+}
+
+.crosshair {
+  cursor: crosshair;
+}
+
+.button-text{
+  display : inline-block;
+}
+
+.dropdown-node-insert {
+  font-size: small;
+  overflow-x: auto;
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+  overflow-y: scroll;
+
+}
+
+.insertion-position-active{
+  background-color: var(--bs-primary);
+  color: white;
+}
+
+.grid {
+  background-image: radial-gradient(var(--line-color) 1px, transparent 0px);
+  background-size: 20px 20px;
+}
+
+.dropdown-menu {
+  border-radius: 0;
+  background-color: lightgray;
+}
+
+.exportMode-container{
+  position : absolute;
+  right : 0;
+  bottom : 0;
+  max-width: 45%;
+  max-height: 95%;
+}
+

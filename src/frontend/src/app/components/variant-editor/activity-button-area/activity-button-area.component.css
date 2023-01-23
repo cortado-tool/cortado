@@ -1,0 +1,23 @@
+.activity-button-area{
+  color: var(--text-secondary);
+  width: 100%;
+  max-height: fit-content;
+  overflow-x: auto;
+  overflow-y: auto;
+  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+  align-content: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 1px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-top: var(--thin-border-color) 1px solid;
+  border-bottom: var(--thin-border-color) 1px solid;
+}
+
+.activity-button{
+  cursor : pointer;
+}
+

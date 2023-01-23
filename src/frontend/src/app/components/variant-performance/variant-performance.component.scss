@@ -1,0 +1,17 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  position: absolute;
+  background-color: var(--box-background-color);
+}
+
+.variant-performance-th {
+  font-size: medium;
+  font-weight: normal;
+  color: white;
+}
+
+.no-top-border {
+  border-top: none;
+}

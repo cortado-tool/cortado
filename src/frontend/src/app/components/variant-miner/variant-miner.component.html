@@ -1,0 +1,591 @@
+<app-drop-zone
+  [dropzoneConfig]="dropZoneConfig"
+  (fileOnHover)="toggleBlur($event)"
+>
+</app-drop-zone>
+
+<div
+  class="variant-miner-mainblock h-100 d-flex flex-column"
+  [class.blurOutOfFocus]="variantMinerOutOfFocus"
+  [style]
+>
+  <div class="variant-miner-container" #variantMiner>
+    <div *ngIf="showControls" @collapse>
+      <div class="control-container">
+        <form
+          [formGroup]="variantMinerConfigInput"
+          (ngSubmit)="onSubmit()"
+          class="mine-config-form"
+        >
+          <div class="form-select-element">
+            <label for="frequent_mining_strat" class="input-label"
+              >Support Counting Strategy:
+            </label>
+            <select
+              formControlName="frequent_mining_strat"
+              class="form-select input-selector"
+            >
+              <option
+                [ngValue]="FrequentMiningStrategy.TraceTransaction"
+                selected
+              >
+                Trace Transaction
+              </option>
+              <option [ngValue]="FrequentMiningStrategy.VariantTransaction">
+                Variant Transaction
+              </option>
+              <option [ngValue]="FrequentMiningStrategy.TraceOccurence">
+                Trace Root-Occurence
+              </option>
+              <option [ngValue]="FrequentMiningStrategy.VariantOccurence">
+                Variant Root-Occurence
+              </option>
+            </select>
+          </div>
+
+          <div class="form-select-element">
+            <label for="frequent_mining_algo" class="input-label"
+              >Algorithm:
+            </label>
+            <select
+              formControlName="frequent_mining_algo"
+              class="form-select input-selector"
+            >
+              <option
+                [ngValue]="FrequentMiningAlgorithm.ValidTreeMiner"
+                selected
+              >
+                Valid Tree Miner
+              </option>
+              <option [ngValue]="FrequentMiningAlgorithm.ClosedMaximalMiner">
+                Blanket Tree Miner
+              </option>
+            </select>
+          </div>
+
+          <div
+            class="form-element d-none"
+            *ngIf="
+              variantMinerConfigInput.value.frequent_mining_algo ===
+              FrequentMiningAlgorithm.ClosedMaximalMiner
+            "
+          >
+            <label for="cm_tree_strategy" class="input-label">Type: </label>
+            <select
+              formControlName="cm_tree_strategy"
+              class="form-select input-selector"
+            >
+              <option
+                [ngValue]="FrequentMiningCMStrategy.ClosedMaximal"
+                selected
+              >
+                Closed and Maximal
+              </option>
+              <option [ngValue]="FrequentMiningCMStrategy.OnlyMaximal">
+                Only Maximal
+              </option>
+            </select>
+          </div>
+
+          <div class="form-element">
+            <label for="size" class="input-label">Maximum Size: </label>
+            <input
+              id="size"
+              type="text"
+              formControlName="size"
+              class="input-field"
+              step="1"
+              min="0"
+            />
+          </div>
+
+          <div class="form-element">
+            <label for="min_sup" class="input-label">Support: </label>
+
+            <input
+              type="number"
+              formControlName="rel_sup"
+              class="input-field"
+              type="number"
+              [(ngModel)]="relSup"
+              step=".01"
+              min="0"
+            />
+            %
+          </div>
+          <div class="rel-sup-input">
+            <div class="sup-selector">
+              <ngx-slider
+                [(value)]="relSup"
+                [options]="supportSliderOptions"
+              ></ngx-slider>
+            </div>
+          </div>
+          <div class="form-element">
+            <div class="abs-sup-input">
+              <input
+                id="min_sup"
+                formControlName="min_sup"
+                class="input-field"
+                type="number"
+                step="1"
+                min="0"
+              />
+              of
+              {{
+                variantMinerConfigInput.value.frequent_mining_strat ===
+                  FrequentMiningStrategy.TraceTransaction ||
+                variantMinerConfigInput.value.frequent_mining_strat ===
+                  FrequentMiningStrategy.TraceOccurence
+                  ? totalTraces
+                  : totalVariants
+              }}
+            </div>
+          </div>
+
+          <div class="form-element">
+            <label for="artifical_start" class="input-label"
+              >Mine prefixes and suffixes:
+            </label>
+            <input
+              id="artifical_start"
+              type="checkbox"
+              formControlName="artifical_start"
+              class="input-field"
+            />
+          </div>
+
+          <div class="form-element">
+            <label for="fold_loop" class="input-label">Fold Loops: </label>
+            <input
+              id="fold_loop"
+              type="checkbox"
+              formControlName="fold_loop"
+              class="input-field"
+            />
+          </div>
+
+          <div
+            class="form-element"
+            *ngIf="this.variantMinerConfigInput.value.fold_loop"
+          >
+            <label for="loop" class="input-label">Loop Threshold: </label>
+            <input
+              id="loop"
+              type="number"
+              min="1"
+              step="1"
+              formControlName="loop"
+              class="input-field"
+            />
+          </div>
+
+          <div class="form-element">
+            <button type="submit" class="button variant-miner-submit-button">
+              Mine
+            </button>
+          </div>
+        </form>
+        <div *ngIf="variantPatterns.length > 0" class="mining-result-overview">
+          <span class="result-span">
+            Total Patterns:
+            {{ nValid }}
+          </span>
+          <span class="result-span">
+            Closed Patterns:
+            {{ nClosed }}</span
+          >
+          <span class="result-span">
+            Maximal Patterns:
+            {{ nMaximal }}
+          </span>
+          <span></span>
+          <span class="result-span">
+            Maximal Support:
+            {{ maxSup }}</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="pattern-table-container">
+      <div class="control-button-container">
+        <button
+          class="btn control-button"
+          type="button"
+          (click)="showControls = !showControls"
+        >
+          <i class="bi bi-minecart btn-icon"></i>
+        </button>
+      </div>
+
+      <div class="export-button-container">
+        <button
+          class="btn export-button"
+          type="button"
+          (click)="exportVariantMiner()"
+        >
+          <i class="bi bi bi-save btn-icon"></i>
+        </button>
+      </div>
+
+      <div class="filter-button-container dropdown">
+        <button
+          class="btn filter-button"
+          type="button"
+          id="dropdownMenuButton1"
+          data-bs-toggle="dropdown"
+          data-bs-reference="parent"
+          data-bs-auto-close="false"
+          aria-expanded="false"
+          (click)="filterDropDownOpen = !filterDropDownOpen"
+        >
+          <i class="bi bi-funnel-fill"></i>
+          <!---
+            <div
+              class="badge-position"
+              [ngClass]="{
+                invisible: !kFilter.touched()
+              }"
+            >
+              <button
+                class="btn badge-button"
+                (click)="kFilter.reset_filter(); handleFilterChange($event)"
+              >
+                <span
+                  class="badge rounded-pill bg-danger badge-close cursor-pointer"
+                  ><i class="bi bi-x-lg close-icon"></i>
+                </span>
+              </button>
+            </div>
+            -->
+        </button>
+        <div
+          class="dropdown-menu filter-drop-down"
+          aria-labelledby="dropdownMenuButton1"
+          [style.max-height.px]="currentHeight"
+        >
+          <div class="filter-drop-down-content">
+            <div class="filter-option-container">
+              <span>Size:</span>
+              <div class="slider-container sup-selector">
+                <ngx-slider
+                  [(value)]="kFilter.low"
+                  [(highValue)]="kFilter.high"
+                  [options]="kFilter.config"
+                  (userChangeEnd)="handleFilterChange($event)"
+                ></ngx-slider>
+              </div>
+            </div>
+            <div class="radio-content">
+              <span>Model Alignment:</span>
+              <div class="btn-group btn-group-sm" role="group">
+                <ng-template
+                  ngFor
+                  let-choice
+                  [ngForOf]="alignChecks"
+                  let-i="index"
+                >
+                  <input
+                    checked
+                    type="checkbox"
+                    class="btn-check"
+                    name="btncheckbox"
+                    id="{{ 'AlignCheck' + i }}"
+                    autocomplete="off"
+                    (change)="
+                      onCheckChange($event, alignmentFilterList, choice);
+                      this.handleFilterChange($event)
+                    "
+                  />
+                  <label
+                    class="btn btn-outline-primary"
+                    for="{{ 'AlignCheck' + i }}"
+                  >
+                    {{ choice.desc }}</label
+                  >
+                </ng-template>
+              </div>
+            </div>
+
+            <div class="filter-option-container">
+              <span>Support</span>
+              <div class="slider-container sup-selector">
+                <ngx-slider
+                  [(value)]="supFilter.low"
+                  [(highValue)]="supFilter.high"
+                  [options]="supFilter.config"
+                  (userChangeEnd)="handleFilterChange($event)"
+                ></ngx-slider>
+              </div>
+            </div>
+            <div class="radio-content">
+              <span> Closed and Maximal: </span>
+              <div class="btn-group btn-group-sm" role="group">
+                <ng-template
+                  ngFor
+                  let-choice
+                  [ngForOf]="closedMaximalChecks"
+                  let-i="index"
+                >
+                  <input
+                    type="radio"
+                    class="btn-check"
+                    name="btnradio"
+                    id="{{ 'Radio' + i }}"
+                    autocomplete="off"
+                    (change)="
+                      onCheckRadioChange(choice.desc, choice.filterFnc);
+                      this.handleFilterChange($event)
+                    "
+                    [checked]="choice.desc === 'Valid'"
+                  />
+                  <label
+                    class="btn btn-outline-primary"
+                    for="{{ 'Radio' + i }}"
+                  >
+                    {{ choice.desc }}</label
+                  >
+                </ng-template>
+              </div>
+            </div>
+            <div class="radio-content">
+              <span> Infix Types: </span>
+              <div class="btn-group btn-group-sm" role="group">
+                <ng-template
+                  ngFor
+                  let-choice
+                  [ngForOf]="infixChecks"
+                  let-i="index"
+                >
+                  <input
+                    checked
+                    type="checkbox"
+                    class="btn-check"
+                    name="btncheckbox"
+                    id="{{ 'InfixCheck' + i }}"
+                    autocomplete="off"
+                    (change)="
+                      onCheckChange($event, infixFilterList, choice);
+                      this.handleFilterChange($event)
+                    "
+                  />
+                  <label
+                    class="btn btn-outline-primary"
+                    for="{{ 'InfixCheck' + i }}"
+                  >
+                    {{ choice.desc }}</label
+                  >
+                </ng-template>
+              </div>
+            </div>
+            <app-activity-button-area
+              *ngIf="filterDropDownOpen && minerVisibile"
+              [activityNames]="activityNames"
+              (activityButtonClick)="handleActivityButtonClick($event)"
+            >
+            </app-activity-button-area>
+          </div>
+        </div>
+      </div>
+
+      <table class="pattern-table">
+        <thead class="user-select-none sticky-header-row">
+          <tr>
+            <th resizeable class="text-center" rowspan="1" [margin]="-4">
+              <div class="header-text-container">
+                <div
+                  class="header-text"
+                  (click)="sort(VariantSortKey.size)"
+                  [ngClass]="{
+                    'selected-header-text':
+                      currentSortKey === VariantSortKey.size
+                  }"
+                >
+                  Size
+                </div>
+              </div>
+            </th>
+            <th
+              resizeable
+              class="text-center border-start border-lightgrey"
+              rowspan="1"
+              [margin]="-4"
+            >
+              <div class="header-text-container">
+                <div
+                  class="header-text"
+                  (click)="sort(VariantSortKey.conformance)"
+                  [ngClass]="{
+                    'selected-header-text':
+                      currentSortKey === VariantSortKey.conformance
+                  }"
+                >
+                  Fitting
+                </div>
+                <button
+                  (click)="computeAlignments()"
+                  [disabled]="!processTree"
+                  class="conformance-button"
+                >
+                  <i class="bi bi-layers-fill btn-icon"></i>
+                </button>
+              </div>
+            </th>
+            <th
+              resizeable
+              class="text-center border-start border-lightgrey"
+              rowspan="1"
+              [margin]="-4"
+            >
+              <div class="header-text-container">
+                <div
+                  class="header-text"
+                  (click)="sort(VariantSortKey.support)"
+                  [ngClass]="{
+                    'selected-header-text':
+                      currentSortKey === VariantSortKey.support
+                  }"
+                >
+                  Support
+                </div>
+              </div>
+            </th>
+            <th
+              resizeable
+              class="border-lightgrey border-start border-end text-center"
+              colspan="2"
+              [margin]="-4"
+            >
+              <div class="header-text-container">
+                <div class="header-text" (click)="sort(VariantSortKey.closed)">
+                  Type
+                </div>
+                <i
+                  [ngClass]="{
+                    'bi-sort-numeric-down': ascending,
+                    'bi-sort-numeric-down-alt': !ascending,
+                    invisible: !(
+                      currentSortKey === VariantSortKey.closed ||
+                      currentSortKey === VariantSortKey.maximal
+                    )
+                  }"
+                ></i>
+              </div>
+            </th>
+            <th
+              resizeable
+              class="text-start border-lightgrey border-start"
+              rowspan="1"
+              [margin]="-4"
+            >
+              <div
+                class="header-text-container variant-header"
+                [style.min-width.px]="maxWidth + 90"
+              >
+                <div class="header-text">Variant</div>
+                <i
+                  class="bi"
+                  [ngClass]="{
+                    'bi-sort-up': ascending,
+                    'bi-sort-down': !ascending,
+                    invisible: true
+                  }"
+                ></i>
+              </div>
+            </th>
+          </tr>
+          <tr class="sticky-header-row" style="top: 33px">
+            <th class="text-center">
+              <i
+                [ngClass]="{
+                  'bi-sort-numeric-down': ascending,
+                  'bi-sort-numeric-down-alt': !ascending,
+                  invisible: !(currentSortKey === VariantSortKey.size)
+                }"
+              ></i>
+            </th>
+            <th class="text-center border-start border-lightgrey">
+              <i
+                [ngClass]="{
+                  'bi-sort-numeric-down': ascending,
+                  'bi-sort-numeric-down-alt': !ascending,
+                  invisible: !(currentSortKey === VariantSortKey.conformance)
+                }"
+              ></i>
+            </th>
+            <th class="text-center border-start border-lightgrey">
+              <i
+                [ngClass]="{
+                  'bi-sort-numeric-down': ascending,
+                  'bi-sort-numeric-down-alt': !ascending,
+                  invisible: !(currentSortKey === VariantSortKey.support)
+                }"
+              ></i>
+            </th>
+            <th
+              class="confidence-names text-center border-start border-lightgrey"
+            >
+              <div
+                (click)="sort(VariantSortKey.closed)"
+                class="header-text"
+                [ngClass]="{
+                  'selected-header-text':
+                    currentSortKey === VariantSortKey.closed
+                }"
+              >
+                Closed
+              </div>
+            </th>
+            <th
+              class="confidence-names text-center border-start border-lightgrey"
+            >
+              <div
+                (click)="sort(VariantSortKey.maximal)"
+                class="header-text"
+                [ngClass]="{
+                  'selected-header-text':
+                    currentSortKey === VariantSortKey.maximal
+                }"
+              >
+                Maximal
+              </div>
+            </th>
+            <th
+              class="confidence-names text-center border-lightgrey border-start"
+            >
+              <div class="header-text"></div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            app-variant-miner-pattern
+            *ngFor="let pattern of displayedVariantsPatterns; let i = index"
+            [pattern]="pattern"
+            [index]="i"
+            [rootElement]="variantMinerDiv"
+          >
+            <svg
+              appVariantDrawer
+              #fragment
+              [variant]="pattern"
+              [onClickCbFc]="onClickCbFc"
+              [computeActivityColor]="computeActivityColor"
+              [onRightMouseClickCbFc]="openContextCallback"
+              [infixType]="pattern.infixType"
+              [keepStandardView]="true"
+              class="zoom-group-variant"
+            ></svg>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<app-variant-explorer-context-menu
+  [xPos]="contextMenu_xPos"
+  [yPos]="contextMenu_yPos"
+  [contextMenuOptions]="contextMenuOptions"
+></app-variant-explorer-context-menu>

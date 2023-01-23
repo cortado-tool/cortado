@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+cycler~=0.11.0
+networkx==3.0rc1
+python-multipart
+pm4py==2.4.1
+appdirs
+websockets
+#git+https://gitlab.fit.fraunhofer.de/cortado/cortado-core.git@master#egg=cortado_core
+git+https://github.com/cortado-tool/cortado-core@main#egg=cortado_core
+cvxopt
+pyinstaller

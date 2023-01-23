@@ -1,0 +1,73 @@
+<div
+  class="modal fade"
+  id="tiebreakerModalDialog"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="tiebreakerModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content dialog">
+      <div class="modal-header h-line-modal-bottom">
+        <h5 class="modal-title text-light" id="tiebreakerModalLabel">
+          Tiebreaker
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mx-0 d-flex flex-row align-items-center">
+          <label for="sourcePattern" class="text-light dialog-label">
+            Source Pattern
+          </label>
+          <div>
+            <textarea
+              id="sourcePattern"
+              class="tiebreaker-editor"
+              rows="3"
+              #sourcePattern
+            ></textarea>
+            <div class="invalid-feedback">Please provide a valid input.</div>
+          </div>
+        </div>
+        <div class="row mx-0 d-flex flex-row align-items-center">
+          <label for="targetPattern" class="text-light dialog-label">
+            Target Pattern
+          </label>
+          <div>
+            <textarea
+              id="targetPattern"
+              class="tiebreaker-editor"
+              rows="3"
+              #targetPattern
+            ></textarea>
+            <div class="invalid-feedback">Please provide a valid input.</div>
+          </div>
+        </div>
+        <div class="modal-footer h-line-modal-top">
+          <button
+            id="close-modal"
+            type="button"
+            class="button"
+            data-bs-dismiss="modal"
+          >
+            <i class="bi bi-x btn-icon text-danger"></i>
+            Close
+          </button>
+          <button
+            type="button"
+            class="button"
+            (click)="apply(sourcePattern.value, targetPattern.value)"
+          >
+            <i class="bi bi-save btn-icon text-success"></i>
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

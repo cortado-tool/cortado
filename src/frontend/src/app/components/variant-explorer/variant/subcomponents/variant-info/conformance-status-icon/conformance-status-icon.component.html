@@ -1,0 +1,50 @@
+<ng-container
+  *ngIf="!variant.calculationInProgress; else calculationInProgress"
+>
+  <!-- timeout icon-->
+  <i
+    class="bi bi-hourglass-bottom font-large text-warning"
+    *ngIf="variant.isTimeouted"
+    ngbTooltip="(re)calculate conformance statistics"
+    container="body"
+  ></i>
+
+  <!-- check-square icon-->
+  <i
+    class="bi bi-check-square font-large text-success"
+    *ngIf="variant.deviations === 0 && !variant.isConformanceOutdated"
+  ></i>
+  <i
+    class="bi bi-check-square font-large text-warning"
+    *ngIf="variant.deviations === 0 && variant.isConformanceOutdated"
+    ngbTooltip="(re)calculate conformance statistics"
+    container="body"
+  >
+  </i>
+  <!-- x-square icon-->
+  <i
+    class="bi bi-x-square font-large text-danger"
+    *ngIf="variant.deviations > 0 && !variant.isConformanceOutdated"
+  >
+  </i>
+  <i
+    class="bi bi-x-square font-large text-warning"
+    *ngIf="variant.deviations > 0 && variant.isConformanceOutdated"
+    ngbTooltip="(re)calculate conformance statistics"
+    container="body"
+  >
+  </i>
+
+  <!-- question mark icon-->
+  <i
+    class="bi bi-question-square text-secondary align-middle font-large"
+    *ngIf="variant.deviations === undefined && !variant.isTimeouted"
+    ngbTooltip="(re)calculate conformance statistics"
+    container="body"
+  >
+  </i>
+</ng-container>
+<ng-template #calculationInProgress>
+  <!-- hourglass-split icon-->
+  <i class="bi bi-hourglass-split font-large text-secondary"></i>
+</ng-template>

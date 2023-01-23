@@ -1,0 +1,23 @@
+.context-menu{
+  display : block;
+  position : fixed;
+  color: white;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));;
+  border-radius: 2px;
+  z-index :  100;
+
+}
+
+.context-menu-list{
+  list-style-type:none;
+  padding: 5px;
+  margin: 0px;
+}
+
+.button:hover:enabled {
+  background-color: #4d4e50;
+}
+
+.drop-down-button:hover:enabled {
+  background-color: #c7c9cc;
+}

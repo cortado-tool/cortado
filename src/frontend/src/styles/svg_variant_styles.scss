@@ -1,0 +1,32 @@
+.selected-polygon {
+  stroke: whitesmoke !important;
+  stroke-width: 3px;
+  stroke-dasharray: 4;
+}
+
+.selected-polygon {
+  stroke: whitesmoke !important;
+  stroke-width: 3px;
+  stroke-dasharray: 4;
+}
+
+
+svg * {
+  outline: none
+}
+
+text {
+  stroke: none;
+}
+
+.variant-element-group {
+  stroke: none;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.variant-polygon {
+  cursor: pointer;
+}

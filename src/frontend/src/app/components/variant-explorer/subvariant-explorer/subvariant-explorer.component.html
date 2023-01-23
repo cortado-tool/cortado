@@ -1,0 +1,198 @@
+<app-performance-progress-bar></app-performance-progress-bar>
+
+<app-variant-explorer-sidebar></app-variant-explorer-sidebar>
+
+<div class="d-flex flex-column h-100 container-variant-explorer">
+  <div
+    class="main-variant-explorer flex-grow-1"
+    [class.blurOutOfFocus]="
+      variantPerformanceService.performanceUpdateIsInProgress
+    "
+  >
+    <div class="bg-dark btn-tool-bar">
+      <div *ngIf="svgRenderingInProgress" class="full-body-spinner">
+        <div class="svg-rendering-status">
+          <div class="spinner-border spinner-border-sm" role="status"></div>
+          Exporting Subvariants View...
+        </div>
+      </div>
+      <span class="vl ms-auto"></span>
+      <ng-template #tooltip1>
+        Sort subvariants by frequency
+        <br />Click to change sort order <br />Current sort order: ascending
+      </ng-template>
+      <div
+        *ngIf="sortAscending"
+        class="btn-group align-baseline"
+        [ngbTooltip]="tooltip1"
+        container="body"
+      >
+        <button
+          class="button"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          (click)="toggleSortOrder()"
+        >
+          <i
+            [ngClass]="
+              sortAscending
+                ? 'bi bi-sort-numeric-down btn-icon'
+                : 'bi bi-sort-numeric-down-alt btn-icon'
+            "
+          ></i>
+        </button>
+      </div>
+      <ng-template #tooltip2>
+        Sort subvariants by frequency
+        <br />Click to change sort order <br />Current sort order: descending
+      </ng-template>
+      <div
+        *ngIf="!sortAscending"
+        class="btn-group align-baseline"
+        [ngbTooltip]="tooltip2"
+        container="body"
+      >
+        <button
+          class="button"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+          (click)="toggleSortOrder()"
+        >
+          <i
+            [ngClass]="
+              sortAscending
+                ? 'bi bi-sort-numeric-down btn-icon'
+                : 'bi bi-sort-numeric-down-alt btn-icon'
+            "
+          ></i>
+        </button>
+      </div>
+      <span class="vl"></span>
+      <button
+        class="button"
+        ngbTooltip="export the view as an .svg"
+        container="body"
+        (click)="exportSubvariantSVG()"
+      >
+        <i class="bi bi-save"></i>
+      </button>
+    </div>
+    <div class="d-flex">
+      <div class="chart-variant__percentage">
+        <table *ngIf="containsLoopCollapsedVariants">
+          <tr>
+            <td style="padding-right: 15px; padding-left: 5px">Super-Parent</td>
+            <td>
+              <app-variant-info
+                [selectable]="false"
+                [variant]="mainVariant"
+                (updateConformance)="
+                  updateConformanceForSingleVariantClicked($event)
+                "
+              ></app-variant-info>
+            </td>
+            <td class="variant-cell">
+              <div class="variant" style="">
+                <svg
+                  appVariantDrawer
+                  #fragment
+                  [variant]="mainVariant"
+                  [onClickCbFc]="variantClickCallBack"
+                  [computeActivityColor]="computeActivityColor"
+                ></svg>
+              </div>
+            </td>
+          </tr>
+        </table>
+        <div
+          *ngFor="
+            let variantWithSubvariants of subvariants | keyvalue;
+            let i = index
+          "
+          [ngClass]="containsLoopCollapsedVariants ? 'ms-5' : ''"
+        >
+          <!-- Using the same components as on the main explorer to visualize the base variant of the subvariant explorer--->
+          <table>
+            <tr>
+              <td style="padding-right: 15px; padding-left: 5px">
+                <ng-container *ngIf="containsLoopCollapsedVariants"
+                  >Parent {{ index }}.{{ i + 1 }}</ng-container
+                >
+                <ng-container *ngIf="!containsLoopCollapsedVariants"
+                  >Parent</ng-container
+                >
+              </td>
+              <td>
+                <app-variant-info
+                  [selectable]="false"
+                  [variant]="variantWithSubvariants.key"
+                  (updateConformance)="
+                    updateConformanceForSingleVariantClicked($event)
+                  "
+                ></app-variant-info>
+              </td>
+              <td class="variant-cell">
+                <div class="variant" style="">
+                  <svg
+                    appVariantDrawer
+                    #fragment
+                    [variant]="variantWithSubvariants.key"
+                    [onClickCbFc]="variantClickCallBack"
+                    [computeActivityColor]="computeActivityColor"
+                  ></svg>
+                </div>
+              </td>
+            </tr>
+            <tr
+              *ngFor="
+                let subVariant of variantWithSubvariants.value[0];
+                let j = index
+              "
+            >
+              <td style="padding-right: 15px; padding-left: 5px">
+                <ng-container *ngIf="containsLoopCollapsedVariants"
+                  >{{ index }}.{{ i + 1 }}.{{ j + 1 }}</ng-container
+                >
+                <ng-container *ngIf="!containsLoopCollapsedVariants"
+                  >{{ index }}.{{ j + 1 }}</ng-container
+                >
+              </td>
+              <td style="text-align: start">
+                <ng-template #tooltip3>
+                  sub-variant describes ~{{ subVariant.percentage }}% of all
+                  traces of the main-variant<br />
+                  <span class="text-secondary"
+                    >sub-variant occurs {{ subVariant.count | number }} time(s)
+                    in total</span
+                  >
+                </ng-template>
+                <small
+                  class="cursor-help"
+                  [ngbTooltip]="tooltip3"
+                  container="body"
+                >
+                  {{ subVariant.percentage }}%<br />
+                  ({{ subVariant.count | number }})
+                </small>
+              </td>
+              <td style="padding: 5px 5px 5px 50px">
+                <app-sub-variant
+                  class="cursor-pointer"
+                  (click)="toggleExpanded()"
+                  [expanded]="mainVariant.variant.expanded"
+                  [variant]="subVariant.variant"
+                  [colorMap]="colorMap"
+                  [onClickCbFc]="subvariantClickCallBack.bind(this)"
+                  [mainVariant]="variantWithSubvariants.key.variant"
+                >
+                </app-sub-variant>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

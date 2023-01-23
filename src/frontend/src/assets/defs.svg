@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+  <!-- Some graphical objects to use -->
+  <defs>
+
+  <marker id="arrow-grey" refX="3" refY="3" markerWidth="10" markerHeight="10" orient="auto" markerUnits="strokeWidth">
+    <path d="M 0 0 6 3 0 6 1.5 3" fill="gray"></path>
+  </marker>
+  <marker id="arrow-red" refX="3" refY="3" markerWidth="10" markerHeight="10" orient="auto" markerUnits="strokeWidth">
+    <path d="M 0 0 6 3 0 6 1.5 3" fill="red"></path>
+  </marker>
+  <marker id="arrow-frozen" refX="3" refY="3" markerWidth="10" markerHeight="10" orient="auto" markerUnits="strokeWidth">
+    <path d="M 0 0 6 3 0 6 1.5 3" fill="#425bbf"></path>
+  </marker>
+  </defs>
+</svg>

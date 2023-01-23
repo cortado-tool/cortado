@@ -1,0 +1,401 @@
+<app-drop-zone
+  [dropzoneConfig]="dropZoneConfig"
+  (fileOnHover)="toggleBlur($event)"
+>
+</app-drop-zone>
+
+<div
+  class="main-process-tree-editor h-100 d-flex flex-column"
+  [class.blurOutOfFocus]="processEditorOutOfFocus"
+>
+  <div class="bg-dark btn-tool-bar">
+    <div
+      class="btn-group align-baseline dropDownParent dropdown"
+      ngbTooltip="add node"
+      container="body"
+    >
+      <button
+        class="button text-success dropdown-toggle"
+        [disabled]="insertNewNodeButtonDisabled()"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+        data-bs-auto-close="outside"
+        id="addNodeDropdown"
+        (show.bs.dropdown)="checkNodeInsertionStrategy()"
+        (mouseleave)="hideAllTooltips()"
+      >
+        <i class="bi bi-plus-square-fill btn-icon"></i>
+      </button>
+      <div
+        class="dropdown-menu dropdown-node-insert"
+        [style.max-height.px]="currentEditorHeight"
+        id="dropdownNewNode"
+        aria-labelledby="addNodeDropdown"
+      >
+        <div id="positionMethodSelection">
+          <div class="fst-italic fw-bold ps-2 text-center">Position</div>
+          <div
+            class="dropdown-item"
+            *ngIf="!insertPositionAboveDisabled"
+            [ngClass]="
+              nodeInsertionStrategy === NodeInsertionStrategy.ABOVE
+                ? 'insertion-position-active'
+                : ''
+            "
+            (click)="nodeInsertionStrategy = NodeInsertionStrategy.ABOVE"
+          >
+            <i class="bi bi-box-arrow-in-up btn-icon"></i>
+            <span class="ms-3">insert above</span>
+          </div>
+
+          <div
+            class="dropdown-item"
+            *ngIf="!insertPositionLeftRightDisabled"
+            [ngClass]="
+              nodeInsertionStrategy === NodeInsertionStrategy.LEFT
+                ? 'insertion-position-active'
+                : ''
+            "
+            (click)="nodeInsertionStrategy = NodeInsertionStrategy.LEFT"
+          >
+            <i class="bi bi-box-arrow-in-left btn-icon"></i>
+            <span class="ms-3">insert left</span>
+          </div>
+
+          <div
+            class="dropdown-item"
+            *ngIf="insertPositionBelowDisabled"
+            [ngClass]="
+              nodeInsertionStrategy === NodeInsertionStrategy.BELOW
+                ? 'insertion-position-active'
+                : ''
+            "
+            (click)="nodeInsertionStrategy = NodeInsertionStrategy.BELOW"
+          >
+            <i class="bi bi-box-arrow-in-down btn-icon"></i>
+            <span class="ms-3">insert below</span>
+          </div>
+
+          <div
+            class="dropdown-item"
+            *ngIf="!insertPositionLeftRightDisabled"
+            [ngClass]="
+              nodeInsertionStrategy === NodeInsertionStrategy.RIGHT
+                ? 'insertion-position-active'
+                : ''
+            "
+            (click)="nodeInsertionStrategy = NodeInsertionStrategy.RIGHT"
+          >
+            <i class="bi bi-box-arrow-in-right btn-icon"></i>
+            <span class="ms-3">insert right</span>
+          </div>
+          <div class="dropdown-divider"></div>
+        </div>
+
+        <div class="fst-italic fw-bold ps-2 text-center">Node</div>
+
+        <ng-template #operatorListDropdown>
+          <div class="fst-italic ps-2 text-primary">Operator</div>
+
+          <div class="dropdown-item" (click)="insertNewNode('\u2715', null)">
+            <span class="fw-bold">&#x2715;</span>
+            <span class="ms-3 text-secondary">choice</span>
+          </div>
+          <div class="dropdown-item" (click)="insertNewNode('\u2794', null)">
+            <span class="fw-bold">&#x2794;</span>
+            <span class="ms-3 text-secondary">sequence</span>
+          </div>
+          <div class="dropdown-item" (click)="insertNewNode('\u21BA', null)">
+            <span class="fw-bold">&#x21BA;</span>
+            <span class="ms-3 text-secondary">loop</span>
+          </div>
+          <div class="dropdown-item" (click)="insertNewNode('\u2227', null)">
+            <span class="fw-bold">&#x2227;</span>
+            <span class="ms-3 text-secondary">parallel</span>
+          </div>
+        </ng-template>
+
+        <ng-template [ngTemplateOutlet]="operatorListDropdown"></ng-template>
+
+        <ng-template #activityListDropdown>
+          <div class="fst-italic ps-2 text-primary">Activity</div>
+
+          <div class="dropdown-item" (click)="insertNewNode(null, '\u03C4')">
+            <span class="fw-bold">&#x03C4;</span>
+            <span class="ms-3 text-secondary">invisible activity</span>
+          </div>
+
+          <div class="ms-1 me-1 mb-1">
+            <input
+              [(ngModel)]="searchText"
+              class="form-control form-control-sm"
+              type="text"
+              placeholder="type activity name"
+            />
+          </div>
+          <div
+            class="dropdown-item"
+            *ngFor="let a of activitiesOccurringInLog | strFilter : searchText"
+            (click)="insertNewNode(null, a)"
+          >
+            <span class="">{{ a }}</span>
+          </div>
+        </ng-template>
+
+        <ng-template [ngTemplateOutlet]="activityListDropdown"></ng-template>
+      </div>
+    </div>
+
+    <div
+      class="btn-group align-baseline dropdown dropDownParent"
+      ngbTooltip="change selected node"
+      container="body"
+      (show.bs.dropdown)="
+        lastNodeInsertionStrategy = nodeInsertionStrategy;
+        nodeInsertionStrategy = NodeInsertionStrategy.CHANGE
+      "
+      (hide.bs.dropdown)="nodeInsertionStrategy = lastNodeInsertionStrategy"
+      (mouseleave)="hideAllTooltips()"
+    >
+      <button
+        class="button"
+        data-bs-placement="top"
+        [disabled]="
+          !selectedRootNode ||
+          (nodeSelectionStrategy === NodeSeletionStrategy.TREE &&
+            !singleNodeSelected())
+        "
+        type="button"
+        data-bs-toggle="dropdown"
+        data-bs-auto-close="outside"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        <i class="bi bi-pencil-square btn-icon"></i>
+      </button>
+      <div
+        class="dropdown-menu dropdown-node-insert"
+        [style.max-height.px]="currentEditorHeight"
+        #dropdownChangeNode
+      >
+        <ng-template [ngTemplateOutlet]="operatorListDropdown"></ng-template>
+        <ng-template [ngTemplateOutlet]="activityListDropdown"></ng-template>
+      </div>
+    </div>
+
+    <button
+      class="button text-warning"
+      (click)="deleteSubtree()"
+      [disabled]="buttonDeleteSubtreeDisabled()"
+      ngbTooltip="remove selected node(s)"
+      container="body"
+    >
+      <i class="bi bi-trash btn-icon"></i>
+    </button>
+
+    <button
+      class="button"
+      (click)="shiftSubtreeToLeft()"
+      [disabled]="buttonManipulatingMultipleNodesDisabled()"
+      ngbTooltip="shift selected node(s) to left"
+      container="body"
+    >
+      <i class="bi bi-chevron-left btn-icon"></i>
+    </button>
+
+    <button
+      class="button"
+      (click)="shiftSubtreeToRight()"
+      [disabled]="buttonManipulatingMultipleNodesDisabled()"
+      ngbTooltip="shift selected node(s) to right"
+      container="body"
+    >
+      <i class="bi bi-chevron-right btn-icon"></i>
+    </button>
+
+    <button
+      class="button"
+      (click)="applyReductionRules()"
+      [disabled]="!currentlyDisplayedTreeInEditor"
+      ngbTooltip="Applies reduction rules to remove redundant and unnecessary nodes"
+      container="body"
+    >
+      <i class="bi bi-diagram-2"></i>
+    </button>
+
+    <span class="vl"></span>
+
+    <button
+      class="button btn-fixed-width"
+      (click)="undo()"
+      [disabled]="!(treeCacheLength - 1 > 0 && treeCacheIndex !== 0)"
+      ngbTooltip="undo"
+      container="body"
+    >
+      <i class="bi bi-arrow-counterclockwise btn-icon"></i>
+      <span
+        class="text-secondary"
+        *ngIf="treeCacheLength - 1 > 0 && treeCacheIndex !== 0"
+      >
+        ({{ treeCacheIndex }})
+      </span>
+    </button>
+
+    <button
+      class="button btn-fixed-width"
+      (click)="redo()"
+      [disabled]="!(treeCacheIndex < treeCacheLength - 1)"
+      ngbTooltip="redo"
+      container="body"
+    >
+      <i class="bi bi-arrow-clockwise btn-icon"></i>
+      <span class="text-secondary" *ngIf="treeCacheIndex < treeCacheLength - 1">
+        ({{ treeCacheLength - 1 - treeCacheIndex }})
+      </span>
+    </button>
+
+    <span class="vl"></span>
+
+    <button
+      class="button"
+      (click)="selectNodeButton()"
+      [class.button-active]="
+        nodeSelectionStrategy === NodeSeletionStrategy.NODE
+      "
+      ngbTooltip="select node"
+      container="body"
+    >
+      <i class="bi bi-fullscreen btn-icon text-danger"></i>
+      <div class="button-text px-1" @collapseText *ngIf="!collapse">
+        select node
+      </div>
+    </button>
+
+    <button
+      class="button"
+      (click)="selectSubtreeButton()"
+      [class.button-active]="
+        nodeSelectionStrategy === NodeSeletionStrategy.TREE
+      "
+      ngbTooltip="select subtree"
+      container="body"
+    >
+      <i class="bi bi-fullscreen btn-icon text-danger"></i>
+      <div class="button-text px-1" @collapseText *ngIf="!collapse">
+        select subtree
+      </div>
+    </button>
+
+    <button
+      class="button"
+      (click)="clearSelection()"
+      ngbTooltip="clear selection"
+      container="body"
+    >
+      <i class="bi bi-x-lg btn-icon text-danger"></i>
+      <div class="button-text px-1" @collapseText *ngIf="!collapse">
+        clear selection
+      </div>
+    </button>
+
+    <span class="vl"></span>
+
+    <ng-template #unfreezeTooltip>
+      (un)freeze <em>entire</em> subtree to prevent them from being changed when
+      adding variants
+    </ng-template>
+    <button
+      class="button"
+      (click)="freezeSubtree()"
+      [disabled]="buttonFreezeSubtreeDisabled()"
+      [ngbTooltip]="unfreezeTooltip"
+      container="body"
+    >
+      <i
+        class="bi bi-snow btn-icon"
+        [ngClass]="!buttonFreezeSubtreeDisabled() ? 'text-primary' : ''"
+      ></i>
+      <div class="button-text px-1" @collapseText *ngIf="!collapse">
+        (un)freeze subtrees
+      </div>
+    </button>
+
+    <span class="vl"></span>
+
+    <button
+      class="button ms-auto"
+      ngbTooltip="Toggle BPMN editor in Splitview"
+      container="body"
+      (click)="toggleBPMNEditor()"
+    >
+      <i class="bi bi-window-split"></i>
+    </button>
+
+    <button
+      id="btn-reset-zoom"
+      class="button"
+      ngbTooltip="reset view"
+      container="body"
+    >
+      <i class="bi bi-arrows-fullscreen btn-icon text-light"></i>
+    </button>
+
+    <button
+      class="button"
+      ngbTooltip="export the tree as an .svg"
+      container="body"
+      (click)="exportCurrentTree(d3svg)"
+    >
+      <i class="bi bi-save"></i>
+    </button>
+  </div>
+
+  <div #d3container id="d3-container" class="m-1 flex-grow-1 crosshair grid">
+    <div class="floating-infobox" *ngIf="processTreeSyntaxInfo">
+      <div class="text-success" *ngIf="processTreeSyntaxInfo.correctSyntax">
+        syntax correct
+      </div>
+      <div class="text-danger" *ngIf="!processTreeSyntaxInfo.correctSyntax">
+        <b>
+          <i class="bi bi-exclamation-triangle"></i>
+          syntax incorrect
+        </b>
+      </div>
+
+      <div class="text-danger" *ngIf="processTreeSyntaxInfo.errors.length > 0">
+        syntax errors:
+        <ul>
+          <li *ngFor="let err of processTreeSyntaxInfo.errors">{{ err }}</li>
+        </ul>
+      </div>
+
+      <div
+        class="text-warning"
+        *ngIf="processTreeSyntaxInfo.warnings.length > 0"
+      >
+        syntax warnings:
+        <ul>
+          <li *ngFor="let war of processTreeSyntaxInfo.warnings">{{ war }}</li>
+        </ul>
+      </div>
+    </div>
+
+    <app-expert-mode> </app-expert-mode>
+    <svg #d3svg id="d3-svg" width="100%" height="100%">
+      <g id="zoomGroup">
+        <g
+          #d3svgDirective
+          appProcessTreeDrawer
+          [onClickCallBack]="selectNodeCallBack"
+          [computeNodeColor]="computeNodeColor"
+          [computeTextColor]="computeTextColor"
+          [tooltipText]="tooltipContent"
+          id="d3-svg-directive"
+          width="100%"
+          height="100%"
+        ></g>
+      </g>
+    </svg>
+  </div>
+</div>

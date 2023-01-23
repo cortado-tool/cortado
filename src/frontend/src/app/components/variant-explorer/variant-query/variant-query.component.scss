@@ -1,0 +1,114 @@
+.query-container{
+  width : 100%;
+  height : 100%;
+}
+
+.form-container{
+  width: 90%;
+  height: 65%;
+  display: block;
+  transform: translateZ(0);
+  -webkit-text-size-adjust: none;
+  margin: 0.75rem auto 0.5rem auto;
+}
+
+.form{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: stretch;
+  align-items: stretch;
+  justify-content: center;
+}
+
+
+.backend-error{
+  color : var(--bs-danger);
+}
+
+.query-editor-highlights {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--text-secondary);
+
+}
+
+.query-editor-backdrop{
+  position: absolute;
+  z-index: 1;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+  overflow: auto;
+  border-radius: 3px;
+  pointer-events: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select : none;
+  width: 100%;
+  height : 100%;
+}
+
+.syntax-error-container{
+  width: 100%;
+  overflow: scroll;
+  max-height: 3rem;
+  margin-right: 0.25rem;
+  margin-left: 0.25rem;
+}
+
+.syntax-error{
+  color : var(--bs-warning);
+  font-size : x-small;
+}
+
+.query-editor{
+  display: block;
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.07);
+  background-color: transparent;
+  caret-color: rgb(255, 255, 255);
+  overflow: auto;
+  resize: none;
+  width: 100%;
+  height : 100%;
+}
+
+.query-editor-highlights, textarea {
+  padding: 10px;
+  font-size: var(--standard-font-size);
+  letter-spacing: 0.25px;
+}
+
+textarea:focus{
+  outline: none;
+  box-shadow: none;
+}
+
+
+.query-field{
+  width : 100%;
+  height : 100%;
+}
+
+.variant-query-tool-bar{
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 100%;
+  align-content: flex-start;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  position: absolute;
+  bottom: 0px;
+}
+
+.dropdown-menu {
+  border-radius: 0;
+  background-color: lightgray;
+}
+

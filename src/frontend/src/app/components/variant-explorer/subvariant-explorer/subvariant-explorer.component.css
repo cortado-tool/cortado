@@ -1,0 +1,61 @@
+.main-variant-explorer {
+  overflow: auto;
+  background-color: var(--box-background-color);
+}
+
+.chart-variant__percentage {
+  margin-left: 4px;
+  display: inline-flex;
+  flex-direction: column;
+  /*
+  min-width: 50px;
+  */
+  font-size: .8rem;
+  color: whitesmoke;
+  color: var(--text-secondary);
+}
+
+:host {
+  position: absolute;
+  overflow: hidden;
+}
+
+.variant-info-cell {
+  align-items: center;
+  display: flex;
+}
+
+.btn-tool-bar{
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  border-top: 0px;
+	position: sticky;
+	top: 0;
+  left: 0;
+}
+
+.variant-cell {
+  width: 100%;
+}
+
+.variant {
+  padding: 5px;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.svg-rendering-status {
+  color: var(--text-secondary);
+}
+
+
+/* Move all below to central place - also used in variant explorer */
+
+.container-variant-explorer {
+  min-height: 100%;
+  width: calc(100% - 20px);
+  position: relative;
+  border-left: 1px solid var(--thin-border-color);
+  margin-left: 20px;
+}

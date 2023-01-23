@@ -1,0 +1,120 @@
+<ul class="nav nav-tabs bg-dark" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link active button"
+      id="variant-selection-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#variantSelection"
+      role="tab"
+      aria-controls="variantSelection"
+      aria-selected="true"
+    >
+      Selection
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link button"
+      id="variant-colormap-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#variantColormap"
+      type="button"
+      role="tab"
+      aria-controls="variantColormap"
+      aria-selected="false"
+      #colorMapTab
+    >
+      Color Map
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content" id="myTabContent">
+  <div
+    class="tab-pane fade show active"
+    id="variantSelection"
+    role="tabpanel"
+    aria-labelledby="variant-selection-tab"
+  >
+    <ng-container *ngTemplateOutlet="selectionPerformance"> </ng-container>
+  </div>
+  <div
+    class="tab-pane fade color-map-tab"
+    id="variantColormap"
+    role="tabpanel"
+    aria-labelledby="variant-color-map"
+  >
+    <app-variant-color-map
+      *ngIf="
+        variantPerformanceService.performanceInformationLoaded;
+        else unavailableInfoColorMap
+      "
+    ></app-variant-color-map>
+    <ng-template #unavailableInfoColorMap>
+      <app-unavailable-info>
+        No performance values available.
+        <br />
+        To load performance values change into Performance View in the Variant
+        Explorer.
+      </app-unavailable-info>
+    </ng-template>
+  </div>
+</div>
+
+<ng-template #selectionPerformance>
+  <app-unavailable-info *ngIf="!performanceStats">
+    To show variant performance, change into Performance View and click on the
+    variant chevron in the Variant Explorer.
+  </app-unavailable-info>
+
+  <div *ngIf="performanceStats">
+    <table
+      class="table table-sm table-striped table-dark table-hover table-bordered mb-0"
+      style="font-size: small"
+    >
+      <thead>
+        <tr>
+          <th colspan="2" class="variant-performance-th">{{ title }}</th>
+        </tr>
+      </thead>
+      <tbody class="no-top-border">
+        <tr>
+          <td>Mean:</td>
+          <td>
+            {{ performanceStats.mean | humanizeDuration }}
+          </td>
+        </tr>
+        <tr>
+          <td>Stdev:</td>
+          <td>
+            {{ performanceStats.stdev | humanizeDuration }}
+          </td>
+        </tr>
+        <tr>
+          <td>Min:</td>
+          <td>
+            {{ performanceStats.min | humanizeDuration }}
+          </td>
+        </tr>
+        <tr>
+          <td>Max:</td>
+          <td>
+            {{ performanceStats.max | humanizeDuration }}
+          </td>
+        </tr>
+        <tr>
+          <td>95th Percentile:</td>
+          <td>
+            {{ performanceStats["95th"] | humanizeDuration }}
+          </td>
+        </tr>
+        <tr>
+          <td>50th Percentile:</td>
+          <td>
+            {{ performanceStats["50th"] | humanizeDuration }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</ng-template>

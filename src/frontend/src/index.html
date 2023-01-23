@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Cortado &#8212; Interactive Tool for Data-Driven Process Discovery & Modeling</title>
+  <base href="./">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- https://www.electronjs.org/docs/faq#i-can-not-use-jqueryrequirejsmeteorangularjs-in-electron -->
+
+  <!---
+    <script>
+
+      delete window.require;
+      delete window.exports;
+      delete window.module;
+    </script>
+  -->
+
+  <!--<link rel="icon" type="image/x-icon" href="favicon.ico">-->
+
+</head>
+<body id="body">
+<app-root>
+  <div class="loadingIndicatorContainer d-flex justify-content-center align-items-center">
+    <img class="cortadoLogo" src="./assets/favicon.ico">
+  </div>
+</app-root>
+<div id="monaco-editor-overflow-widgets-root" class="monaco-editor" style="z-index: 999;"></div>
+</body>
+</html>

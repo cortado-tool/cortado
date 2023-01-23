@@ -1,0 +1,380 @@
+<div class="variant-editor">
+  <div class="bg-dark btn-tool-bar">
+    <button
+      class="button"
+      (click)="addCurrentVariantToVariantList()"
+      [disabled]="emptyVariant"
+      ngbTooltip="Add variant to Log"
+      container="body"
+    >
+      <i
+        class="bi bi-hammer"
+        [ngClass]="{
+          'text-success': !emptyVariant
+        }"
+      ></i>
+
+      <div @collapseText class="button-text px-1" *ngIf="!collapse">
+        Add new variant to log
+      </div>
+    </button>
+
+    <span class="vl mx-2"></span>
+
+    <div class="btn-group round-corners" role="group">
+      <input
+        type="radio"
+        class="btn-check"
+        (click)="handleInfixButtonClick(infixType.NOT_AN_INFIX)"
+        id="radio_variant"
+      />
+
+      <label
+        class="button"
+        for="radio_variant"
+        [ngClass]="
+          curInfixType === infixType.NOT_AN_INFIX ? 'strategy-selected' : ''
+        "
+        ngbTooltip="model variant"
+        container="body"
+        ><svg height="20" width="20">
+          <use href="#variantChevron"></use></svg
+      ></label>
+
+      <input
+        type="radio"
+        class="btn-check"
+        (click)="handleInfixButtonClick(infixType.PREFIX)"
+        id="radio_prefix"
+      />
+      <label
+        class="button"
+        for="radio_prefix"
+        [ngClass]="curInfixType === infixType.PREFIX ? 'strategy-selected' : ''"
+        ngbTooltip="model prefix variant"
+        container="body"
+        ><svg height="20" width="20">
+          <use href="#prefixChevron"></use></svg
+      ></label>
+
+      <input
+        type="radio"
+        class="btn-check"
+        (click)="handleInfixButtonClick(infixType.PROPER_INFIX)"
+        id="radio_infix"
+      />
+      <label
+        class="button"
+        for="radio_infix"
+        [ngClass]="
+          curInfixType === infixType.PROPER_INFIX ? 'strategy-selected' : ''
+        "
+        ngbTooltip="model infix variant"
+        container="body"
+        ><svg height="20" width="20">
+          <use href="#infixChevron"></use></svg
+      ></label>
+
+      <input
+        type="radio"
+        class="btn-check"
+        (click)="handleInfixButtonClick(infixType.POSTFIX)"
+        id="radio_postfix"
+      />
+      <label
+        class="button"
+        for="radio_postfix"
+        [ngClass]="
+          curInfixType === infixType.POSTFIX ? 'strategy-selected' : ''
+        "
+        ngbTooltip="model postfix variant"
+        container="body"
+      >
+        <svg height="20" width="20">
+          <use href="#postfixChevron"></use>
+        </svg>
+      </label>
+    </div>
+
+    <span class="vl mx-2"></span>
+
+    <div class="btn-group round-corners" role="group">
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.infront"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.infront
+            ? 'strategy-selected'
+            : ''
+        "
+        ngbTooltip="insert new activities infront the selected activtiy"
+        container="body"
+      >
+        <i class="bi bi-chevron-left"></i>
+      </button>
+
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.behind"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.behind
+            ? 'strategy-selected'
+            : ''
+        "
+        ngbTooltip="insert new activities behind of the selected activtiy"
+        container="body"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </button>
+
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.parallel"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.parallel
+            ? 'strategy-selected'
+            : ''
+        "
+        ngbTooltip="insert new activities parallel of the selected activtiy"
+        container="body"
+      >
+        <i class="bi bi-chevron-expand"></i>
+      </button>
+
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.replace"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.replace
+            ? 'strategy-selected'
+            : ''
+        "
+        ngbTooltip="replace the currently selected activity"
+        container="body"
+      >
+        <i class="bi bi-arrow-repeat"></i>
+      </button>
+    </div>
+
+    <span class="vl mx-2"></span>
+
+    <button
+      class="button btn-fixed-width"
+      (click)="undo()"
+      [disabled]="!(cachedVariants.length - 1 > 0 && cacheIdx !== 0)"
+      ngbTooltip="undo"
+      container="body"
+    >
+      <i class="bi bi-arrow-counterclockwise btn-icon"></i>
+      <span
+        class="text-secondary"
+        *ngIf="cachedVariants.length - 1 > 0 && cacheIdx !== 0"
+      >
+        ({{ cacheIdx }})
+      </span>
+    </button>
+
+    <button
+      class="button btn-fixed-width"
+      (click)="redo()"
+      [disabled]="!(cacheIdx < cachedVariants.length - 1)"
+      ngbTooltip="redo"
+      container="body"
+    >
+      <i class="bi bi-arrow-clockwise btn-icon"></i>
+      <span class="text-secondary" *ngIf="cacheIdx < cachedVariants.length - 1">
+        ({{ cachedVariants.length - 1 - cacheIdx }})
+      </span>
+    </button>
+
+    <span class="vl mx-2"></span>
+
+    <button
+      class="button"
+      (click)="onDeleteSelected()"
+      ngbTooltip="remove the currently selected activity"
+      container="body"
+      [disabled]="emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-trash"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      ></i>
+
+      <div @collapseText class="button-text px-1" *ngIf="!collapse">
+        remove selected chevron
+      </div>
+    </button>
+
+    <span class="vl mx-2"></span>
+
+    <button
+      class="button"
+      (click)="onDeleteVariant()"
+      ngbTooltip="remove the current variant"
+      container="body"
+      [disabled]="emptyVariant"
+    >
+      <i
+        class="bi bi-x-octagon"
+        [ngClass]="{
+          'text-danger': !emptyVariant
+        }"
+      ></i>
+      <div @collapseText class="button-text px-1" *ngIf="!collapse">
+        remove current variant
+      </div>
+    </button>
+
+    <button
+      class="button ms-auto"
+      ngbTooltip="focus selected"
+      container="body"
+      (click)="focusSelected()"
+      [disabled]="emptyVariant || multipleSelected"
+    >
+      <i class="bi bi-eye-fill"></i>
+    </button>
+
+    <button
+      class="button ms-auto"
+      ngbTooltip="move to the start of the variant"
+      container="body"
+      (click)="centerVariant()"
+    >
+      <i class="bi bi-arrows-fullscreen btn-icon text-light"></i>
+    </button>
+  </div>
+  <app-activity-button-area
+    [activityNames]="activityNames"
+    (activityButtonClick)="handleActivityButtonClick($event)"
+    [ngClass]="
+      multipleSelected || (!selectedElement && !emptyVariant)
+        ? 'button-area-disabled'
+        : ''
+    "
+  >
+  </app-activity-button-area>
+
+  <app-zoom-field
+    [zoomScale]="[0.1, 3]"
+    [computeFocusOffsets]="computeFocusOffset"
+  >
+    <svg
+      #content
+      #VariantMainGroup
+      appVariantDrawer
+      id="VariantMainGroup"
+      [variant]="{ variant: currentVariant }"
+      (selection)="handleRedraw($event)"
+      [computeActivityColor]="computeActivityColor"
+      [infixType]="curInfixType"
+      class="zoom-group-variant"
+    ></svg>
+  </app-zoom-field>
+  <div class="redundancy-warning" @fadeIn *ngIf="redundancyWarning">
+    This variant already exists in the user defined dataset
+  </div>
+</div>
+
+<svg>
+  <symbol
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    id="variantChevron"
+    transform-origin="10 10"
+  >
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M11.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L17.293 8 11.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+  </symbol>
+
+  <symbol
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    id="prefixChevron"
+    transform-origin="10 10"
+  >
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="grey"
+      fill-rule="evenodd"
+      d="M11.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L17.293 8 11.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+  </symbol>
+  <symbol
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    id="infixChevron"
+    transform-origin="10 10"
+  >
+    <path
+      fill="grey"
+      fill-rule="evenodd"
+      d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="grey"
+      fill-rule="evenodd"
+      d="M11.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L17.293 8 11.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+  </symbol>
+  <symbol
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    id="postfixChevron"
+    transform-origin="10 10"
+  >
+    <path
+      fill="grey"
+      fill-rule="evenodd"
+      d="M3.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L9.293 8 3.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M7.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L13.293 8 7.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+    <path
+      fill="white"
+      fill-rule="evenodd"
+      d="M11.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L17.293 8 11.646 2.354a.5.5 0 0 1 0-.708z"
+    />
+  </symbol>
+</svg>

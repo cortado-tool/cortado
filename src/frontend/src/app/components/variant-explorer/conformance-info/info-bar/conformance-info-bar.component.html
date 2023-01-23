@@ -1,0 +1,74 @@
+<div class="info-bar ps-2 pe-2">
+  <!-- In case conformance statistics are not available yet -->
+  <span
+    class="float-start"
+    *ngIf="
+      logStats.totalNumberTraces && logStats.numberFittingTraces === undefined
+    "
+  >
+    fitting traces:
+    <span>
+      -&nbsp;/&nbsp;{{
+        logStats.totalNumberTraces | number
+      }}
+      (&nbsp;-&nbsp;%)</span
+    >
+  </span>
+
+  <span
+    class="float-start"
+    *ngIf="
+      (logStats.numberFittingTraces || logStats.numberFittingTraces >= 0) &&
+      (logStats.totalNumberTraces || logStats.totalNumberTraces > 0)
+    "
+  >
+    fitting traces:
+    <span [ngClass]="!isConformanceOutdated ? '' : 'text-warning'">
+      {{ logStats.numberFittingTraces | number }}&nbsp;/&nbsp;{{
+        logStats.totalNumberTraces | number
+      }}
+      ({{
+        logStats.numberFittingTraces / logStats.totalNumberTraces
+          | percent : ".1"
+      }})</span
+    >
+  </span>
+
+  <!-- In case conformance statistics are not available yet -->
+  <span
+    class="float-start ms-4"
+    *ngIf="
+      logStats.totalNumberVariants &&
+      logStats.numberFittingVariants === undefined
+    "
+  >
+    fitting variants:
+    <span>
+      -&nbsp;/&nbsp;{{
+        logStats.totalNumberVariants | number
+      }}
+      (&nbsp;-&nbsp;%)</span
+    >
+  </span>
+
+  <span
+    class="float-start ms-4"
+    *ngIf="
+      (logStats.numberFittingVariants || logStats.numberFittingVariants >= 0) &&
+      (logStats.totalNumberVariants || logStats.totalNumberVariants > 0)
+    "
+  >
+    fitting variants:
+    <span [ngClass]="!isConformanceOutdated ? '' : 'text-warning'">
+      {{ logStats.numberFittingVariants | number }}&nbsp;/&nbsp;{{
+        logStats.totalNumberVariants | number
+      }}
+      ({{
+        logStats.numberFittingVariants / logStats.totalNumberVariants
+          | percent : ".1"
+      }})
+    </span>
+  </span>
+
+  <span class="float-end"> selected variants: {{ numSelectedVariants }} </span>
+</div>

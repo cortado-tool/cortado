@@ -1,0 +1,88 @@
+<div class="accordion" *ngIf="meanValues">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button
+        class="accordion-button"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#collapseMean"
+        aria-expanded="true"
+      >
+        Overall Performance
+      </button>
+    </h2>
+    <div
+      id="collapseMean"
+      class="accordion-collapse collapse"
+      [class.show]="performanceService.activeVariant === undefined"
+    >
+      <app-performance-table
+        [performanceValues]="meanValues.service_time"
+        heading="Service Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+      <app-performance-table
+        [performanceValues]="meanValues.waiting_time"
+        heading="Waiting Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+      <app-performance-table
+        [performanceValues]="meanValues.cycle_time"
+        heading="Cycle Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+      <app-performance-table
+        [performanceValues]="meanValues.idle_time"
+        heading="Idle Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+    </div>
+  </div>
+  <div class="accordion-item" *ngFor="let variant of variants; let i = index">
+    <h2 class="accordion-header">
+      <button
+        class="accordion-button"
+        type="button"
+        data-bs-toggle="collapse"
+        [attr.data-bs-target]="'#collapse' + i"
+        aria-expanded="true"
+      >
+        Variant No. {{ variantIndices.get(variant) }}
+      </button>
+    </h2>
+    <div
+      [id]="'collapse' + i"
+      class="accordion-collapse collapse"
+      [class.show]="performanceService.activeVariant === variant"
+    >
+      <app-performance-table
+        [performanceValues]="serviceTimeValues.get(variant)"
+        heading="Service Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+      <app-performance-table
+        [performanceValues]="waitingTimeValues.get(variant)"
+        heading="Waiting Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+      <app-performance-table
+        [performanceValues]="cycleTimeValues.get(variant)"
+        heading="Cycle Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+      <app-performance-table
+        [performanceValues]="idleTimeValues.get(variant)"
+        heading="Idle Time"
+        [isBodyExpanded]="false"
+      >
+      </app-performance-table>
+    </div>
+  </div>
+</div>

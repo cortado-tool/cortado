@@ -1,0 +1,37 @@
+:host {
+  position: absolute;
+  width : 100%;
+  height : 100%;
+  border-bottom: 1px solid black;
+  overflow: hidden;
+}
+
+
+.bpmn-tree-editor{
+  background-color: var(--box-background-color);
+  max-height: 100%;
+  position: relative;
+  border-left: 1px solid var(--thin-border-color);
+}
+
+.crosshair {
+  cursor: crosshair;
+}
+
+.grid {
+  background-image: radial-gradient(var(--line-color) 1px, transparent 0px);
+  background-size: 20px 20px;
+}
+
+.editor-zone{
+  width : 100%;
+  height : 100%;
+}
+
+.bi-diagram-2.rotate-270::before {
+  transform: rotate(270deg);
+}
+
+.button-text{
+  display : inline-block;
+}

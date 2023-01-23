@@ -1,0 +1,54 @@
+:host {
+  position: absolute;
+  overflow: hidden;
+}
+
+.variant-editor{
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: var(--box-background-color);
+  flex-direction: column;
+  border-bottom: 1px;
+  border-color: var(--thin-border-color);
+}
+
+.zoom-group-variant{
+  width : 100%;
+  height: 100%;
+}
+
+.strategy-selected{
+  background-color: #515a64;
+}
+
+.round-corners{
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.button-area-disabled{
+  opacity: 0.5;
+  -webkit-user-select: none;
+  pointer-events: none;
+
+}
+
+.button-text{
+  display : inline-block;
+}
+
+.redundancy-warning{
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
+  color: var(--bs-warning);
+  background-color: rgba(0, 0, 0, 1);
+  padding-right: 5px;
+  padding-top: 6px;
+  padding-bottom: 2.5px;
+  padding-left: 5px;
+  font-size: small;
+  border-top-right-radius: 4px;
+
+}

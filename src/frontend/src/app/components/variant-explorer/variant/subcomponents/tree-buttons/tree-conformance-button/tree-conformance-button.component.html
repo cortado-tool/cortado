@@ -1,0 +1,61 @@
+<div
+  style="
+    display: flex;
+    flex-direction: row;
+    padding: 5px;
+    margin: 5px 10px 5px 10px;
+  "
+  [ngClass]="{
+    'selected-variant-performance': isConformanceActive,
+    'light-dashed-border': !isConformanceActive && isConformanceAvailable
+  }"
+>
+  <button
+    type="button"
+    class="btn variant-tree-projection-button"
+    (click)="showSelectedConformance()"
+    [ngbTooltip]="tooltip"
+    container="body"
+    id="conformanceButton{{ variant ? variant.bid : 'Merged' }}"
+    style="display: flex; flex-direction: column"
+    [style.background]="computeConformanceButtonColor()"
+  >
+    <ng-template #tooltip>
+      <div *ngIf="isConformanceAvailable; else tooltipConfNotAvailable">
+        Conformance: {{ (conformanceValue * 100).toFixed(2) }}%
+        <hr class="tooltip-hr" />
+        click to visualize conformance of this variant on model
+      </div>
+
+      <ng-template #tooltipConfNotAvailable
+        >calculate model conformance of this variant</ng-template
+      >
+    </ng-template>
+    <i
+      class="bi"
+      [ngClass]="{
+        'bi-map-fill': isConformanceActive,
+        'bi-map': !isConformanceActive
+      }"
+      [style.color]="computeConformanceButtonTextColor()"
+    >
+    </i>
+
+    <div
+      *ngIf="isConformanceCalcInProgress"
+      class="spinner-border spinner-border-sm text-primary"
+      role="status"
+      style="margin-top: 5px"
+    ></div>
+  </button>
+  <button
+    *ngIf="isConformanceAvailable"
+    style="padding: 0; margin-left: 5px"
+    class="btn"
+    (click)="removeCurrentConformance()"
+    data-bs-toggle="tooltip"
+    title="{{ deleteButtonTooltip }}"
+  >
+    <i class="bi bi-x-lg" style="color: white"></i>
+  </button>
+</div>

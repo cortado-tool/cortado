@@ -1,0 +1,77 @@
+<div class="info-box">
+  <ul class="nav nav-tabs bg-dark btn-tool-bar" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link active button"
+        id="activities-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#activities"
+        type="button"
+        role="tab"
+        aria-controls="activities"
+        aria-selected="true"
+      >
+        Activities
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link button"
+        id="tree-performance-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#tree-performance"
+        type="button"
+        role="tab"
+        aria-controls="tree-performance"
+        aria-selected="false"
+      >
+        Model Performance
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button
+        class="nav-link button"
+        id="variant-performance-tab"
+        data-bs-toggle="tab"
+        data-bs-target="#variant-performance"
+        type="button"
+        role="tab"
+        aria-controls="variant-performance"
+        aria-selected="false"
+      >
+        Variant Performance
+      </button>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
+    <div
+      class="tab-pane fade show active"
+      id="activities"
+      role="tabpanel"
+      aria-labelledby="activities-tab"
+    >
+      <app-activity-overview
+        style="width: 100%; max-height: 100%"
+      ></app-activity-overview>
+    </div>
+    <div
+      class="tab-pane fade"
+      id="tree-performance"
+      role="tabpanel"
+      aria-labelledby="tree-performance-tab"
+    >
+      <app-performance class="mh-100" style="width: 100%"></app-performance>
+    </div>
+    <div
+      class="tab-pane fade"
+      id="variant-performance"
+      role="tabpanel"
+      aria-labelledby="variant-performance-tab"
+    >
+      <app-variant-performance
+        class="mh-100"
+        style="width: 100%"
+      ></app-variant-performance>
+    </div>
+  </div>
+</div>

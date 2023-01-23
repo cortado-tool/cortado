@@ -1,0 +1,38 @@
+<div
+  class="progress loader-overlay"
+  *ngIf="variantPerformanceService.performanceUpdateIsInProgress"
+>
+  <div class="container">
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-6 text-center">
+        <p style="color: whitesmoke; font-size: 14px">
+          Loading performance statistics ...
+        </p>
+      </div>
+      <div class="col"></div>
+    </div>
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-6">
+        <div class="progress">
+          <div
+            class="progress-bar progress-bar-striped progress-bar-animated progress-color"
+            role="progressbar"
+            [attr.aria-valuenow]="
+              variantPerformanceService.performanceUpdateProgress
+            "
+            aria-valuemin="0"
+            aria-valuemax="1"
+            [style.width]="
+              (
+                variantPerformanceService.performanceUpdateProgress * 100
+              ).toString() + '%'
+            "
+          ></div>
+        </div>
+      </div>
+      <div class="col"></div>
+    </div>
+  </div>
+</div>

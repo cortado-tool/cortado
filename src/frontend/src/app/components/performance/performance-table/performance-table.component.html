@@ -1,0 +1,78 @@
+<table
+  class="table table-sm table-striped table-dark table-hover table-bordered mb-0"
+  style="font-size: small"
+  *ngIf="performanceValues"
+>
+  <tbody
+    *ngIf="!isBodyExpanded"
+    (click)="isBodyExpanded = !isBodyExpanded"
+    style="cursor: pointer"
+  >
+    <tr>
+      <td
+        style="
+          border-right: none;
+          white-space: nowrap;
+          vertical-align: middle;
+          width: 35%;
+        "
+      >
+        {{ heading }} (mean)
+      </td>
+      <td style="width: 60%" *ngIf="!isBodyExpanded">
+        {{ performanceValues.mean | humanizeDuration : false : true : 3 }}
+      </td>
+      <td colspan="2" style="width: 5%; border-left: none">
+        <i class="bi bi-caret-left-fill" *ngIf="!isBodyExpanded"></i>
+        <i class="bi bi-caret-down-fill" *ngIf="isBodyExpanded"></i>
+      </td>
+    </tr>
+  </tbody>
+  <tbody
+    *ngIf="isBodyExpanded"
+    (click)="isBodyExpanded = !isBodyExpanded"
+    style="cursor: pointer"
+  >
+    <tr>
+      <td style="width: 35%" rowspan="6">{{ heading }}</td>
+      <td class="performance-table-metric">Mean:</td>
+      <td class="performance-table-value">
+        {{ performanceValues.mean | humanizeDuration }}
+      </td>
+      <td rowspan="6" style="width: 5%; border-left: none">
+        <i class="bi bi-caret-left-fill" *ngIf="!isBodyExpanded"></i>
+        <i class="bi bi-caret-down-fill" *ngIf="isBodyExpanded"></i>
+      </td>
+    </tr>
+    <tr>
+      <td class="performance-table-metric">Min:</td>
+      <td class="performance-table-value">
+        {{ performanceValues.min | humanizeDuration }}
+      </td>
+    </tr>
+    <tr>
+      <td class="performance-table-metric">Max:</td>
+      <td class="performance-table-value">
+        {{ performanceValues.max | humanizeDuration }}
+      </td>
+    </tr>
+    <tr>
+      <td class="performance-table-metric">Stdev:</td>
+      <td class="performance-table-value">
+        {{ performanceValues.stdev | humanizeDuration }}
+      </td>
+    </tr>
+    <tr>
+      <td class="performance-table-metric">95th Percentile:</td>
+      <td class="performance-table-value">
+        {{ performanceValues["95th"] | humanizeDuration }}
+      </td>
+    </tr>
+    <tr>
+      <td class="performance-table-metric">50th Percentile:</td>
+      <td class="performance-table-value">
+        {{ performanceValues["50th"] | humanizeDuration }}
+      </td>
+    </tr>
+  </tbody>
+</table>

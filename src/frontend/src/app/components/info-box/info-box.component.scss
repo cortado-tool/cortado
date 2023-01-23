@@ -1,0 +1,47 @@
+:host {
+  position: absolute;
+  overflow: hidden;
+  color: whitesmoke;
+  border-left:1px solid black;
+}
+
+.btn-tool-bar{
+  border-top : 0px;
+}
+
+.nav-tabs {
+  border-bottom: none;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 28px;
+}
+
+.tab-content {
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-pane {
+  max-height: 100%;
+}
+
+.nav-link {
+  border: none;
+  background-color: transparent !important;
+  color: #495057;
+
+  &.active {
+    background-color: none;
+    border-bottom: 1px solid whitesmoke;
+    color: whitesmoke
+  }
+}
+
+.info-box {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--box-background-color);
+  //border-left: 1px solid var(--thin-border-color);
+}

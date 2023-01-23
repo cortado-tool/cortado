@@ -1,0 +1,17 @@
+<div
+  class="context-menu"
+  [style.top.px]="yPos"
+  [style.left.px]="xPos"
+  *ngIf="displayMenu"
+>
+  <ul class="context-menu-list">
+    <li *ngFor="let option of contextMenuOptions">
+      <button class="button align-bottom" (click)="option.onClick()">
+        <div>
+          <i class="bi btn-icon pe-2" [class]="option.icon"></i>
+          <span>{{ option.text }}</span>
+        </div>
+      </button>
+    </li>
+  </ul>
+</div>

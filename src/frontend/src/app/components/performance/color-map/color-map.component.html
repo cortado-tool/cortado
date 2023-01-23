@@ -1,0 +1,33 @@
+<div class="color-map" *ngIf="colorMapValues">
+  <ng-container *ngFor="let e of colorMapValues">
+    <span
+      class="list-group-item"
+      style="height: 40px"
+      *ngIf="e.color !== null"
+      [style.background]="e.color"
+    >
+      <div class="colorMapLabel">
+        {{
+          timeBasedLabel
+            ? (e.lowerBound | humanizeDuration : false : true : 3 : true)
+            : e.lowerBound
+        }}{{ suffix }}
+      </div>
+    </span>
+
+    <!--    upper bound   -->
+    <span
+      class="list-group-item"
+      *ngIf="e.color === null && !excludeUpperLabel"
+      style="background: unset"
+    >
+      <div class="colorMapLabel">
+        {{
+          timeBasedLabel
+            ? (e.lowerBound | humanizeDuration : false : true : 3 : true)
+            : e.lowerBound
+        }}{{ suffix }}
+      </div>
+    </span>
+  </ng-container>
+</div>

@@ -1,0 +1,31 @@
+.variant {
+  border-width: 1px !important;
+  padding: 5px;
+  width: fit-content;
+  border: dashed;
+}
+
+.variant-cell {
+  width: 100%;
+}
+
+.variant-spacer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.fixed-right {
+  right: 0;
+  position: sticky;
+  background-color: var(--box-background-color);
+  vertical-align: middle;
+}
+
+td {
+  padding-left: 15px;
+}
+
+td:first-child {
+  padding-left: 15px + 4px;
+}

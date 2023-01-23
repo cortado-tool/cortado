@@ -1,0 +1,35 @@
+<div class="sidebar" [style.width.px]="sidebarHeight">
+  <div
+    class="sidebar-button"
+    [ngClass]="variantViewModeService.viewMode === VM.STANDARD ? 'active' : ''"
+    (click)="setViewModeClicked(VM.STANDARD)"
+  >
+    <span class="sidebar-button-text user-select-none"> Standard View</span>
+  </div>
+
+  <ng-container *ngIf="!variantService.areVariantLoopsCollapsed">
+    <div
+      class="sidebar-button"
+      [ngClass]="
+        variantViewModeService.viewMode === VM.PERFORMANCE ? 'active' : ''
+      "
+      (click)="setViewModeClicked(VM.PERFORMANCE)"
+    >
+      <span class="sidebar-button-text user-select-none">
+        Performance View
+      </span>
+    </div>
+
+    <div
+      class="sidebar-button"
+      [ngClass]="
+        variantViewModeService.viewMode === VM.CONFORMANCE ? 'active' : ''
+      "
+      (click)="setViewModeClicked(VM.CONFORMANCE)"
+    >
+      <span class="sidebar-button-text user-select-none">
+        Conformance View
+      </span>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,27 @@
+.section {
+    padding-bottom: 10px;
+}
+
+.section.stackTrace {
+    border:1px solid gray;
+    border-radius: 5px;
+    cursor: pointer;
+
+    .stackTraceContainer {
+        height: 200px;
+        overflow: auto;
+    
+        code {
+            color: red;
+        }
+    }
+    
+    .iconContainer {
+        gap:6px;
+    }
+
+    .iconContainer .toggleTraceIcon,.copyToClipboard{
+        cursor: pointer;
+    }
+
+}

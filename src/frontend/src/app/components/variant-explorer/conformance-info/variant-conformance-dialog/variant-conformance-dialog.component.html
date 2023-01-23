@@ -1,0 +1,76 @@
+<div
+  class="modal fade"
+  id="conformanceModalDialog"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="conformanceModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content dialog">
+      <div class="modal-header h-line-modal-bottom">
+        <h5 class="modal-title text-light" id="conformanceModalLabel">
+          Increase conformance timeout
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p class="secondary-text">
+          A previous conformance calculation for the selected variant has timed
+          out. Please increase the timeout for the selected variant. The
+          increased timeout will be applied once and will not be stored.
+        </p>
+        <form class="was-validated">
+          <div class="form-group row mx-0">
+            <label
+              for="timeout"
+              class="col-7 col-form-label text-light dialog-label"
+              >Conformance checking timeout
+              <i
+                class="bi bi-question-circle-fill font-large ms-1 align-middle secondary-text"
+                ngbTooltip="The calculation of conformance statistics stops after the configured timeout (in seconds)."
+                container="body"
+              >
+              </i>
+            </label>
+            <div class="col-5">
+              <input
+                type="number"
+                class="form-control styled-input-field"
+                id="timeout"
+                aria-describedby="timeoutHelp"
+                placeholder="Enter timeout"
+                [(ngModel)]="conformanceTimeout"
+                [ngModelOptions]="{ standalone: true }"
+                required
+              />
+              <div class="invalid-feedback">
+                Please provide a valid timeout.
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer h-line-modal-top">
+        <button
+          id="close-modal-conformance"
+          type="button"
+          class="button"
+          data-bs-dismiss="modal"
+        >
+          <i class="bi bi-x btn-icon text-danger"></i>
+          close without calculation
+        </button>
+        <button type="button" class="button" (click)="calculateConformance()">
+          <i class="bi bi-save btn-icon text-success"></i>
+          update conformance
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,46 @@
+<div>
+  <td>
+    <button
+      [disabled]="!variant.variant.isAnyInfixSelected"
+      class="button"
+      (click)="addCurrentSelectedInfix()"
+      ngbTooltip="Add the currently selected infix to the variant explorer"
+      container="body"
+    >
+      <i
+        class="bi bi-scissors align-middle font-large"
+        [ngClass]="
+          variant.variant.isAnyInfixSelected ? 'text-light' : 'text-secondary'
+        "
+      ></i>
+    </button>
+  </td>
+  <td>
+    <button
+      [disabled]="!variant.variant.isAnyInfixSelected"
+      class="button"
+      (click)="resetSelectionStatus()"
+      ngbTooltip="Reset trace infix selection of this variant"
+      container="body"
+    >
+      <i
+        class="bi bi-x-lg align-middle font-large"
+        [ngClass]="
+          variant.variant.isAnyInfixSelected ? 'text-danger' : 'text-secondary'
+        "
+      ></i>
+    </button>
+  </td>
+  <td>
+    <button
+      class="button"
+      (click)="selectAll()"
+      ngbTooltip="Select the whole variant"
+      container="body"
+    >
+      <i
+        class="bi bi-plus-square-dotted align-middle font-large text-light"
+      ></i>
+    </button>
+  </td>
+</div>

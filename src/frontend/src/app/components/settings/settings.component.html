@@ -1,0 +1,156 @@
+<div
+  class="modal fade"
+  id="settingsModalDialog"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="settingsModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content dialog">
+      <div class="modal-header h-line-modal-bottom">
+        <h5 class="modal-title text-light" id="settingsModalLabel">Settings</h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form class="was-validated" [formGroup]="configForm">
+          <div class="form-group row mx-0">
+            <label
+              for="timeout"
+              class="col-7 col-form-label text-light dialog-label"
+              >Conformance checking timeout
+              <i
+                class="bi bi-question-circle-fill font-large ms-1 align-middle secondary-text"
+                ngbTooltip="The calculation of conformance statistics stops after the configured timeout (in seconds). The timeout is applied per variant."
+                container="body"
+              >
+              </i>
+            </label>
+            <div class="col-5">
+              <input
+                type="number"
+                class="form-control styled-input-field"
+                id="timeout"
+                aria-describedby="timeoutHelp"
+                placeholder="Enter timeout"
+                formControlName="timeoutCVariantAlignmentComputation"
+                required
+              />
+              <div class="invalid-feedback">
+                Please provide a valid timeout.
+              </div>
+            </div>
+          </div>
+          <div class="form-group row mx-0 d-flex flex-row align-items-center">
+            <label
+              for="timeout"
+              class="col-7 col-form-label text-light dialog-label"
+            >
+              Minimum number of traces for multiprocessing in variant detection.
+              <i
+                class="bi bi-question-circle-fill font-large ms-1 align-middle secondary-text"
+                ngbTooltip="For variant detection multiprocessing is enabled if the number of traces in the log is greater or equal to this number."
+                container="body"
+              >
+              </i>
+            </label>
+            <div class="col-5">
+              <input
+                type="number"
+                class="form-control styled-input-field"
+                id="mintraces"
+                aria-describedby="minTracesHelp"
+                placeholder=""
+                formControlName="minTracesVariantDetectionMultiprocessing"
+                required
+              />
+              <div class="invalid-feedback">Please provide a valid input.</div>
+            </div>
+          </div>
+          <div class="form-group row mx-0 d-flex flex-row align-items-center">
+            <label
+              for="timeout"
+              class="col-7 col-form-label text-light dialog-label"
+            >
+              Enable Randomized Sequentializations
+              <i
+                class="bi bi-question-circle-fill font-large ms-1 align-middle secondary-text"
+                ngbTooltip="Before applying standard process mining algorithms in the backend, concurrent variants are sequentialized. For variants with much concurrent behavior, this step can result in many sequentializations. If this configuration is enabled, the backend uses a subset of sequentializations."
+                container="body"
+              >
+              </i>
+            </label>
+            <div class="col-5">
+              <div class="form-check form-switch">
+                <input
+                  class="form-check-input"
+                  id="enableNSeq"
+                  type="checkbox"
+                  id="flexSwitchCheckDefault"
+                  formControlName="isNSequentializationReductionEnabled"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="form-group row mx-0 d-flex flex-row align-items-center">
+            <label
+              for="timeout"
+              class="col-7 col-form-label text-light dialog-label"
+            >
+              <ng-template #numSequentializationsTooltip>
+                Before applying standard process mining algorithms in the
+                backend, concurrent variants are sequentialized. This parameter
+                changes the number of sequentializations. Only applied if
+                <b>Enable Randomized Sequentializations</b> is enabled.
+              </ng-template>
+              Number of sequentializations
+              <i
+                class="bi bi-question-circle-fill font-large ms-1 align-middle secondary-text"
+                [ngbTooltip]="numSequentializationsTooltip"
+                container="body"
+              >
+              </i>
+            </label>
+            <div class="col-5">
+              <input
+                type="number"
+                class="form-control styled-input-field"
+                id="nseq"
+                aria-describedby="nSeqHelp"
+                placeholder=""
+                formControlName="numberOfSequentializationsPerVariant"
+                required
+              />
+              <div class="invalid-feedback">Please provide a valid input.</div>
+            </div>
+          </div>
+        </form>
+        <div class="modal-footer h-line-modal-top">
+          <button
+            id="close-modal"
+            type="button"
+            class="button"
+            data-bs-dismiss="modal"
+          >
+            <i class="bi bi-x btn-icon text-danger"></i>
+            close without save
+          </button>
+          <button
+            [disabled]="configForm.invalid || configForm.pristine"
+            type="button"
+            class="button"
+            (click)="saveChanges()"
+          >
+            <i class="bi bi-save btn-icon text-success"></i>
+            save
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

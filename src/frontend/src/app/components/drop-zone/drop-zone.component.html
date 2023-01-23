@@ -1,0 +1,17 @@
+<ngx-file-drop
+  *ngIf="dropZoneDirective.windowDrag"
+  (onFileDrop)="importDroppedFile($event)"
+  class="dropZoneContainer"
+  [class.pullInFront]="dropZoneDirective.windowDrag"
+  (onFileOver)="fileOver($event)"
+  (onFileLeave)="fileLeave($event)"
+  dropZoneClassName="dropZone"
+  contentClassName="dropZoneContent"
+  [accept]="dropzoneConfig.acceptedFormats"
+  directory="false"
+  [multiple]="dropzoneConfig.dropZoneHoverMessage"
+>
+  <ng-template ngx-file-drop-content-tmp>
+    <div *ngIf="showText" [innerHTML]="dropZoneText" class="dropZoneText"></div>
+  </ng-template>
+</ngx-file-drop>

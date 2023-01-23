@@ -1,0 +1,417 @@
+<div *ngIf="showInfo" @flyInDiv class="variant-query-info user-select-none">
+  <div class="variant-query-info-container">
+    <div class="variant-query-info-header">
+      <button class="button button-heading" (click)="requestClose()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+
+      <h5>Variant Query Language</h5>
+    </div>
+
+    <div class="variant-query-info-content" ngNonBindable>
+      <div class="my-3"></div>
+      <hr />
+      A valid <b>Query</b> is made up of <b>Activities</b> and <b>Operators</b>,
+      which together form expressions that can be linked by logical operators to
+      form more complex queries. For syntactic reasons, every query ends with a
+      semicolon ; . Operators come either as unary or binary operators, which
+      express the relationships between a single or multiple activities and the
+      variant. As an example for a unary operator, the following is a query made
+      from a single unary expression that checks if the activity '<span
+        class="activity"
+        >A</span
+      >' is an event happening in the variant.
+
+      <div class="example-text">
+        '<span class="activity">A</span>'
+        <span class="logical-operator">isContained</span>;
+      </div>
+
+      Similarly, a query from a binary expression that checks if every '<span
+        class="activity"
+        >A</span
+      >' activity in the variant is followed by a '<span class="activity"
+        >B</span
+      >' activity, can be written as:
+
+      <div class="example-text">
+        '<span class="activity">A</span>'
+        <span class="logical-operator">isDF</span> '<span class="activity"
+          >B</span
+        >';
+      </div>
+
+      <hr />
+      <div class="my-3"></div>
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>Activities</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>'<span class="activity">Activity</span>'</td>
+            <td>Activity names are written in apostrophes</td>
+          </tr>
+          <tr>
+            <td>
+              <span style="white-space: nowrap"
+                ><span class="logical-operator fw-bold">ANY</span> &#123; '<span
+                  class="activity"
+                  >A</span
+                >', '<span class="activity">B</span>' }</span
+              >
+            </td>
+            <td>
+              Evalutated in an expression, returns True if any activity for the
+              operator returns True
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="logical-operator fw-bold">ALL</span> &#123; '<span
+                class="activity"
+                >A</span
+              >', '<span class="activity">B</span>' }
+            </td>
+            <td>
+              Evalutated in an expression, returns True if all activities for
+              the operator returns True
+            </td>
+          </tr>
+          <tr>
+            <td><b>~</b></td>
+            <td>
+              Written in front of a group; it represents the group consisting of
+              all activites besides the activites in the brackets
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="my-3"></div>
+      <hr />
+      <div>
+        Groups can be used both in unary and binary operators to replace single
+        activities. However, this is restricted to only one side of a binary
+        expression. In case of binary expressions, if the group is located on
+        the left-side of the expression, it is evaluated by simply checking for
+        every member of the group and the right-hand side, if the expression
+        would be fulfilled. The case of a right-hand side group will be covered
+        below.
+      </div>
+      <hr />
+      <div class="my-3"></div>
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>Unary Operator</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="logical-operator"><b>isS</b>tart</span>
+            </td>
+            <td>Returns True if the activity is a start activity</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="logical-operator"><b>isE</b>nd</span>
+            </td>
+            <td>Returns True if the activity is an end activity</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="logical-operator"><b>isC</b>ontained</span>
+            </td>
+            <td>
+              Returns True if the activity is contained inside the variant
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="my-3"></div>
+      <hr />
+      Unary operators express the relationship between a single activity and the
+      variant. The following query evaluates to True if '<span class="activity"
+        >A</span
+      >' is a start activity of the variant. Note that it is not necessarily a
+      unique start activity.
+
+      <div class="example-text">
+        '<span class="activity">A</span>'
+        <span class="logical-operator">isStart</span>;
+      </div>
+
+      For convenience, instead of writing out the full operator name for unary
+      and binary operators, the letters in bold can be used as a shorthand;
+      thus, we can write for example '<span class="activity">A</span>'
+      <span class="logical-operator">isC</span> instead of '<span
+        class="activity"
+        >A</span
+      >' <span class="logical-operator">isContained</span>.
+      <hr />
+      <div class="my-3"></div>
+
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>Binary Operator</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="logical-operator"
+                ><b>isD</b>irectly<b>F</b>ollowed</span
+              >
+            </td>
+            <td>
+              Returns True if the right-hand activity always directly-follows
+              the left-hand activity
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="logical-operator"
+                ><b>isE</b>ventually<b>F</b>ollowed</span
+              >
+            </td>
+            <td>
+              Returns True if the right-hand activity always follows the
+              left-hand activity
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="logical-operator"><b>isP</b>arallel</span>
+            </td>
+            <td>
+              Returns True if the right-hand activity always happens parallel to
+              the left-hand activity
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="my-3"></div>
+      <hr />
+
+      Binary Operators express the relationship between activities in a variant.
+      For example, '<span class="activity">A</span>'
+      <span class="logical-operator">isConcurrent</span> '<span class="activity"
+        >B</span
+      >' is fulfilled, if every occurence of '<span class="activity">A</span>'
+      happens concurrently to a '<span class="activity">B</span>' activity. To
+      add further expressive power, groups can be used on the right-hand side of
+      an binary expression to capture some deeper relations. That is the query
+
+      <div class="example-text">
+        '<span class="activity">A</span>'
+        <span class="logical-operator">isDF </span>
+
+        <span class="logical-operator">ANY</span> &#123; '<span class="activity"
+          >B</span
+        >', '<span class="activity">C</span>'};
+      </div>
+
+      is fulfilled, if every '<span class="activity">A</span>' activity is
+      directly followed by an '<span class="activity">B</span>' or '<span
+        class="activity"
+        >C</span
+      >' activity. This is different to the interpretation of every '<span
+        class="activity"
+        >A</span
+      >' needing to be followed by a '<span class="activity">B</span>' or every
+      '<span class="activity">A</span>' being followed by a '<span
+        class="activity"
+        >C</span
+      >'.
+      <hr />
+      <div class="my-3"></div>
+
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>Quantifiers</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>> NUMBER</td>
+            <td>
+              Returns True if the preceding expression is appears more than
+              NUMBER of times
+            </td>
+          </tr>
+          <tr>
+            <td>= NUMBER</td>
+            <td>
+              Returns True if the preceding expression is appears exactly NUMBER
+              times
+            </td>
+          </tr>
+          <tr>
+            <td>< NUMBER</td>
+            <td>
+              Returns True if the preceding expression is appears less than
+              NUMBER of times
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="my-3"></div>
+
+      <div class="my-3"></div>
+      <hr />
+      <div>
+        Quantifiers can be used to check for the frequency of relations. Instead
+        of checking if '<span class="activity">A</span>' is just contained any
+        number of times,
+
+        <div class="example-text">
+          '<span class="activity">A</span>'
+          <span class="logical-operator">isContained</span>
+          > 2
+        </div>
+
+        will only return True, if '<span class="activity">A</span>' appears at
+        least 3 times in the variant. For binary expressions, this works
+        similarly, thus '<span class="activity">A</span>'
+        <span class="logical-operator">isDF </span> '<span class="activity"
+          >B</span
+        >' = 2, will return True if '<span class="activity">A</span>' is
+        directly-followed 2 times by '<span class="activity">B</span>' in the
+        variant. Some attention needs to be payed when using Quantifiers in
+        conjunction with Groups, as the right-hand side rules also apply here.
+        Thus,
+        <div class="example-text">
+          '<span class="activity">A</span>'
+          <span class="logical-operator">isDF </span>
+          <span class="logical-operator">ALL</span> &#123; '<span
+            class="activity"
+            >B</span
+          >', '<span class="activity">C</span>'} > 1
+        </div>
+
+        will only be evaluated as True if at least two A activities are followed
+        by both a '<span class="activity">B</span>' and a '<span
+          class="activity"
+          >C</span
+        >' activity.
+      </div>
+      <hr />
+      <div class="my-3"></div>
+
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th>Logic Operator</th>
+            <th>Meaning</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="logical-operator fw-bold">AND</span></td>
+            <td>Returns True if all of the expressions are True</td>
+          </tr>
+          <tr>
+            <td><span class="logical-operator fw-bold">OR</span></td>
+            <td>Returns True if any of the expressions is True</td>
+          </tr>
+          <tr>
+            <td><span class="logical-operator fw-bold">NOT</span></td>
+            <td>
+              Returns True if the content of the following expression is False
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="my-3"></div>
+      <hr />
+      <br />
+      Different unary and binary expressions can be linked using logical
+      operators to build complex queries. If we for example want to select all
+      variants in which activity '<span class="activity">A</span>' is either
+      directly followed by activity '<span class="activity">B</span>' or
+      eventually followed by activity '<span class="activity">E</span>', we can
+      write the following query:
+
+      <div class="example-text">
+        '<span class="activity">A</span>'
+        <span class="logical-operator fw-bold">isDF</span> '<span
+          class="activity"
+          >B</span
+        >' <span class="logical-operator fw-bold">OR</span> '<span
+          class="activity"
+          >A</span
+        >' <span class="logical-operator fw-bold">isEF</span> '<span
+          class="activity"
+          >E</span
+        >';
+      </div>
+
+      When linking multiple expressions,
+      <span class="logical-operator fw-bold">AND</span> and
+      <span class="logical-operator fw-bold">OR</span> operators linking
+      expressions can be nested inside each other by using
+      <b> ( ) </b>parenthesis. We can use this to expand our previous example by
+      requiring that now every '<span class="activity">A</span>' activity needs
+      to be followed by an '<span class="activity">E</span>' activity and that
+      every '<span class="activity">E</span>' needs to be followed by an '<span
+        class="activity"
+        >F</span
+      >' activity:
+      <div class="example-text">
+        '<span class="activity">A</span>'
+        <span class="logical-operator fw-bold">isDF</span> '<span
+          class="activity"
+          >B</span
+        >' <span class="logical-operator fw-bold">OR</span> ('<span
+          class="activity"
+          >A</span
+        >' <span class="logical-operator fw-bold">isEF</span> '<span
+          class="activity"
+          >E</span
+        >' <span class="logical-operator fw-bold">AND</span> '<span
+          class="activity"
+          >E</span
+        >' <span class="logical-operator fw-bold">isEF</span> '<span
+          class="activity"
+          >F</span
+        >' );
+      </div>
+
+      Multiple instances of the same operator on the same level can be linked
+      without the need of parenthesis.
+      <span class="logical-operator fw-bold">NOT</span> can be used to negate
+      the expression written after it in <b> ( ) </b>. As an example, if we want
+      to get all variants that have '<span class="activity">B</span>' as the
+      unique and only start actvitiy, we can write the following query:
+      <div class="example-text">
+        '<span class="activity">B</span>'
+        <span class="logical-operator fw-bold">isStart </span>
+        <span class="logical-operator fw-bold">AND </span>
+        <span class="logical-operator fw-bold">NOT </span> ( ~
+        <span class="logical-operator fw-bold">ANY</span> &#123; '<span
+          class="activity"
+          >B</span
+        >'} <span class="logical-operator fw-bold">isStart</span> );
+      </div>
+
+      The first term checks if '<span class="activity">B</span>' is a start
+      activity, while the second expression would be fulfilled if any activity
+      that is not '<span class="activity">B</span>' would be a start activity.
+      Now, as we negate it, the expression can only be true if '<span
+        class="activity"
+        >B</span
+      >' is a start activity and no other activity is a start activity.
+    </div>
+    <hr />
+    <div class="my-3"></div>
+  </div>
+</div>

@@ -1,0 +1,110 @@
+<form>
+  <div class="mb-3">
+    <label for="compareModeSelect" class="form-label text-white">Mode</label>
+    <select
+      id="compareModeSelect"
+      class="form-select form-select-sm"
+      aria-label="performance color scale selection"
+      aria-describedby="compareModeHelp"
+      [(ngModel)]="performanceColorScaleService.selectedColorScale.mode"
+      (change)="colorScaleChange($event)"
+      name="compareMode"
+    >
+      <option
+        *ngFor="let colorScale of availableColorMaps"
+        [value]="colorScale.key"
+      >
+        {{ colorScale.name }}
+      </option>
+    </select>
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        padding-left: 5px;
+        padding-right: 10px;
+      "
+    >
+      <div class="form-text">{{ modeLongHelpText }}</div>
+      <div class="form-text">
+        <i
+          class="bi bi-info-circle"
+          [ngbTooltip]="modeLongHelpText"
+          container="body"
+        ></i>
+      </div>
+    </div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label text-white">Performance Indicator</label>
+    <select
+      class="form-select form-select-sm"
+      aria-label="performance indicator for color scale selection"
+      [(ngModel)]="
+        performanceColorScaleService.selectedColorScale.performanceIndicator
+      "
+      (change)="colorScaleChange($event)"
+      name="performanceIndicator"
+    >
+      <option
+        *ngFor="let pMeasure of availablePerformanceIndicators"
+        [value]="pMeasure"
+      >
+        {{ pMeasure }}
+      </option>
+    </select>
+    <div class="form-text">
+      Choose which performance indicator to use for the color map.
+    </div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label text-white">Statistical Measure</label>
+    <select
+      class="form-select form-select-sm"
+      aria-label="statistic aggregation for color scale seleciton"
+      [(ngModel)]="performanceColorScaleService.selectedColorScale.statistic"
+      (change)="colorScaleChange($event)"
+      name="performanceValue"
+    >
+      <option
+        *ngFor="let pValue of availablePerformanceValues"
+        [value]="pValue"
+      >
+        {{ pValue }}
+      </option>
+    </select>
+    <div class="form-text">
+      Choose which statistical measure to use for the color map.
+    </div>
+  </div>
+</form>
+
+<div
+  class="card"
+  style="width: 100%; background: transparent"
+  *ngIf="colorMapValues"
+>
+  <div class="card-body">
+    <h5
+      *ngIf="
+        performanceColorScaleService.selectedColorScale.mode ===
+          'compareVariants' && selectedTree !== undefined
+      "
+      class="card-title text-white"
+    >
+      Color Map - {{ selectedTree }}
+    </h5>
+    <h5
+      *ngIf="
+        performanceColorScaleService.selectedColorScale.mode !==
+          'compareVariants' || selectedTree === undefined
+      "
+      class="card-title text-white"
+    >
+      Color Map
+    </h5>
+    <p class="card-text">
+      <app-color-map [colorMapValues]="colorMapValues"></app-color-map>
+    </p>
+  </div>
+</div>

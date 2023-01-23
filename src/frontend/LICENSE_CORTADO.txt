@@ -1,0 +1,72 @@
+﻿TERMS AND CONDITIONS FOR USE, COPYING, DISTRIBUTION AND MODIFICATION
+
+Definitions
+
+“Program” means a copy of Fraunhofer FIT’s Cortado, which is said to be distributed under this 
+Academic Public License in Object Code form only.
+
+“Using the Program” means any act of using executables that contain or directly use libraries that are 
+part of the Program or running any of the tools that are part of the Program.
+
+Each licensee is addressed as “you”.
+
+§1. Permission is hereby granted to use the Program free of charge for any noncommercial purpose, 
+including teaching and research at universities, colleges and other educational institutions, research 
+at non-profit research institutions, and personal non-profit purposes. For using the Program for 
+commercial purposes, including but not restricted to consulting activities, design of commercial 
+hardware or software networking products, and a commercial entity participating in research 
+projects, you have to contact Fraunhofer FIT (cortado@fit.fraunhofer.de) for an appropriate license.
+Permission is also granted to use the Program for a reasonably limited period of time for the purpose 
+of evaluating its usefulness for a particular purpose.
+
+§2. You may not copy and distribute verbatim copies of the Program.
+
+§3. You may not copy, modify, sublicense, or distribute the Program except as expressly provided 
+under this License. Any attempt otherwise to copy, modify, sublicense, or distribute the Program is 
+void, and will automatically terminate your rights under this License. You may not decompile the 
+Object Code or attempt to get access to the Source Code in any other way.
+
+§4. You are not required to accept this License since you have not signed it. Nothing else grants you 
+permission to use the Program or its derivative works; law prohibits these actions if you do not 
+accept this License. Therefore, by using or distributing the Program, you indicate your acceptance of 
+this License and all its terms and conditions for copying, distributing, or using the Program, to do so.
+
+§5. If, as a consequence of a court judgment or allegation of patent infringement or for any other 
+reason (not limited to patent issues), conditions are imposed on you (whether by court order, 
+agreement or otherwise) that contradict the conditions of this License, they do not excuse you from 
+the conditions of this License.
+
+If any portion of this section is held invalid or unenforceable under any particular circumstance, the 
+balance of the section is intended to apply, and the section as a whole is intended to apply in other 
+circumstances.
+
+§7. If the use of the Program is restricted in certain countries either by patents or by copyrighted 
+interfaces, the original copyright holder who places the Program under this License may add an 
+explicit geographical distribution limitation excluding those countries, so that usage is permitted only 
+in or among countries not thus excluded. In such case, this License incorporates the limitation as if 
+written in the body of this License.
+
+§8. NO OTHER IP THAN THE „PROGRAM“, ESPECIALLY NO PATENTS, TRADEMARKS, KNOW-HOW, OR 
+OTHER INTELLECTUAL PROPERTY RIGHTS ARE SUBJECT TO THIS LICENSE.
+
+NO WARRANTY
+
+§9. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE 
+PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN 
+WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE PROGRAM “AS IS” 
+WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED 
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
+THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD 
+THE PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR 
+OR CORRECTION.
+
+§10. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED ON IN WRITING WILL ANY 
+COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE 
+PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, 
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE 
+THE PROGRAM INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED 
+INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO 
+OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN 
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+END OF TERMS AND CONDITIONS

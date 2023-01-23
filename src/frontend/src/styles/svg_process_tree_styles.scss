@@ -1,0 +1,88 @@
+/*
+  Classes for the process tree SVG elements are used to easily differentiate the elements
+  and to add style that changes dynamically. Thus easier subtype specific selections can be made
+  and the styling can be stripped before tree export
+
+  Used but Empty classes are:
+
+    .node
+    .node-operator
+    .node-visible-activity
+    .node-invisible-activity
+    .node-text
+
+*/
+
+
+.frozen-node-operator {
+  fill: #25306a !important;
+}
+
+.frozen-node-visible-activity {
+  fill: #425bbf !important;
+}
+
+.frozen-node-invisible-activity {
+  fill: #161e40 !important;
+}
+
+.frozen-edge{
+  stroke : #425bbf !important;
+}
+
+.selected-node{
+  stroke : #dc3545 !important;
+}
+
+.selected-edge{
+  stroke : #dc3545 !important;
+}
+
+
+.performance-tooltip {
+  max-width: none;
+  white-space: nowrap !important;
+
+  table {
+    margin: 0;
+
+    td:first-child {
+      text-align: left;
+      padding-right: 10px;
+    }
+
+    td:last-child {
+      text-align: right;
+    }
+  }
+}
+
+.performance-tooltip-header-style {
+  margin-bottom: 0;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-top-left-radius: calc(0.3rem - 1px);
+  border-top-right-radius: calc(0.3rem - 1px);
+  padding: 6px 10px 0px 10px;
+}
+
+.performance-tooltip-header {
+  color: white;
+  border-bottom: unset;
+}
+
+.performance-tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: #373b3e;
+}
+
+.performance-tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: #373b3e;
+}
+
+.performance-tooltip.bs-tooltip-start .tooltip-arrow::before {
+  border-left-color: #373b3e;
+}
+
+.performance-tooltip.bs-tooltip-end .tooltip-arrow::before {
+  border-right-color: #373b3e;
+}

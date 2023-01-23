@@ -1,0 +1,23 @@
+
+/* Handle Bootstrap default overwrites here */
+
+// Accordion
+
+$accordion-color: var(--text-secondary);
+$accordion-body-padding-y: 0rem 0rem;
+$accordion-body-padding-x: 0rem 0rem;
+$accordion-border-width: 0px;
+$accordion-border-radius: 0px;
+$accordion-inner-border-radius: 0px;
+$accordion-icon-width: .65rem;
+$accordion-icon-color: #a0a0a0;
+$accordion-icon-active-color: #a0a0a0;
+$accordion-button-bg: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+
+$accordion-transition:  border-radius .15s ease, opacity .35s ease-in;
+$accordion-icon-transition: transform .2s ease-in-out;
+
+$accordion-button-active-bg: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+$accordion-button-active-color: var(--text-secondary);
+
+$accordion-icon-transform: rotate(-0deg);

@@ -1,0 +1,56 @@
+<swal
+  swalOptions=""
+  #apiErrorDialog
+  [swalVisible]="isVisible"
+  title="Error occurred"
+  icon="error"
+  [showConfirmButton]="false"
+  [focusCancel]="true"
+  showCancelButton="true"
+  cancelButtonText="Close"
+  (didClose)="onClose()"
+>
+  <div #content *swalPortal>
+    <div class="section">
+      <b>Error message: </b><br />
+      <code style="white-space: pre-line">
+        {{ message }}
+      </code>
+    </div>
+
+    <div
+      *ngIf="apiError.stack_trace"
+      (click)="toggleStackTrace()"
+      class="d-flex flex-column p-2 section stackTrace"
+    >
+      <div class="d-flex flex-row justify-content-between">
+        <b>Stack trace </b>
+        <div class="d-flex flex-row iconContainer">
+          <i
+            appStopClickEventPropagation
+            ngxClipboard
+            *ngxClipboardIfSupported
+            (cbOnSuccess)="onCopySuccess()"
+            [cbContent]="apiError?.stack_trace"
+            class="copyToClipboard bi bi-clipboard pr-2"
+          ></i>
+
+          <i
+            [ngClass]="
+              isStackTraceExpanded ? 'bi-chevron-up' : 'bi-chevron-down'
+            "
+            class="bi toggleTraceIcon"
+          ></i>
+        </div>
+      </div>
+
+      <div
+        *ngIf="isStackTraceExpanded"
+        @expandCollapse
+        class="stackTraceContainer pt-2"
+      >
+        <code>{{ apiError?.stack_trace }}</code>
+      </div>
+    </div>
+  </div>
+</swal>

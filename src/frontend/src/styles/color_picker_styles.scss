@@ -1,0 +1,25 @@
+/* Make the color picker looks more cortado-y */
+
+.color-picker {
+  background-color: var(--box-background-color) !important;
+  z-index: 99999 !important;
+}
+
+.color-picker .hex-text .box div,
+.color-picker .cmyk-text .box div,
+.color-picker .hsla-text .box div,
+.color-picker .rgba-text .box div,
+.color-picker .value-text .box div {
+  color: var(--text-secondary) !important;
+}
+
+.color-picker .type-policy {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAgCAYAAAAffCjxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEKSURBVEhL7ZXBDoIwDIaZJPoqEk6GBzHhyKtw5lU4En0YHoSjRsV16RY2WoqTi4lfQtqR7qddt5FINE0zwoNDFoWWJBSo65qN36GdoUUe6DqodxZWSJOinUK9M5CpSmtClTjLSIu80GWhYjyhPM/32iw2AFEY6/CEqqq6oSsSxrqvS+vCYdfLZLTUVgk715bGtnUFZq6KLSkkHYbhlGXZEcdRdF13RffPT6GKoriUZXnGcRTQ/s02pDlw34rBwbVn7Yk2BjN3s2vECQGfik3vbu+GbNv2gK5IGOsJ9X1/12ZNViPGOrzSLFKJ1O+IFAI4MUoE8EoLoLYEu03YjIAwKy6bVYCYvC2S5A27y2RrXIt7DgAAAABJRU5ErkJggg==) !important;
+}
+
+.cp-button {
+  border: solid !important;
+  border-width: 1px !important;
+  border-radius: 5px;
+  color: var(--text-secondary);
+}

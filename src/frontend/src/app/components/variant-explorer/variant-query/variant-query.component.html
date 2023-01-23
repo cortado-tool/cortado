@@ -1,0 +1,84 @@
+<div class="query-container">
+  <form [formGroup]="variantQueryInput" (ngSubmit)="onSubmit()" class="form">
+    <div class="form-container">
+      <app-editor-zone
+        (editor)="onEditorChange($event)"
+        [formControl]="variantQuery"
+      ></app-editor-zone>
+    </div>
+
+    <div class="syntax-error-container">
+      <ul
+        *ngIf="
+          (!variantQuery.valid &&
+            (variantQuery.dirty || variantQuery.touched)) ||
+          backendErrorMessage
+        "
+        class="syntax-error"
+      >
+        <div *ngIf="variantQuery.errors?.['monaco']">
+          <li *ngFor="let parserError of variantQuery.errors?.['monaco'].value">
+            Error {{ parserError }}
+          </li>
+        </div>
+        <li *ngIf="variantQuery.errors?.['backendError']" class="backend-error">
+          <span> {{ variantQuery.errors?.['backendError'] }} </span>
+        </li>
+      </ul>
+    </div>
+    <div class="variant-query-tool-bar" *ngIf="active">
+      <button
+        type="submit"
+        class="button"
+        [disabled]="!active || variantQuery.invalid"
+      >
+        <i class="bi bi-funnel"></i> Execute Query
+      </button>
+
+      <button
+        *ngIf="queryfilteractive"
+        type="button"
+        class="button"
+        [disabled]="!active"
+        (click)="resetQuery()"
+      >
+        <i class="bi bi-x-lg text-danger"></i> Remove query filter
+      </button>
+
+      <div class="dropdown" *ngIf="queryfilteractive">
+        <button
+          class="button dropdown-toggle"
+          type="button"
+          id="filterRemovalDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="bi bi-trash text-danger"></i> Delete variants by query
+        </button>
+
+        <ul
+          class="dropdown-menu custom-dropdown"
+          aria-labelledby="filterRemovalDropdown"
+        >
+          <li>
+            <button
+              (click)="executeRemovalActionOnFilteredVariants(true)"
+              class="dropdown-item"
+            >
+              remove variants satisfying the current query (visible variants)
+            </button>
+          </li>
+          <li>
+            <button
+              (click)="executeRemovalActionOnFilteredVariants(false)"
+              class="dropdown-item"
+            >
+              remove variants non-satisfying the current query (filtered
+              variants)
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </form>
+</div>

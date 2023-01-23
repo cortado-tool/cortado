@@ -1,0 +1,35 @@
+<div
+  class="toast bg-dark secondary-text-color"
+  role="alert"
+  aria-live="assertive"
+  aria-atomic="true"
+  #toastElement
+>
+  <div class="toast-header toast-header-bg">
+    <i
+      class="bi {{ toastEvent.icon }}"
+      [ngClass]="{
+        'secondary-text-color': toastEvent.type === ToastType.SUCCESS,
+        'text-warning': toastEvent.type === ToastType.WARNING,
+        'text-danger': toastEvent.type === ToastType.ERROR
+      }"
+    ></i>
+    <strong
+      class="me-auto ms-2"
+      [ngClass]="{
+        'secondary-text-color': toastEvent.type === ToastType.SUCCESS,
+        'text-warning': toastEvent.type === ToastType.WARNING,
+        'text-danger': toastEvent.type === ToastType.ERROR
+      }"
+      >{{ toastEvent.title }} - {{ type }}</strong
+    >
+
+    <button
+      type="button"
+      class="btn-close btn-close-white"
+      data-bs-dismiss="toast"
+      aria-label="Close"
+    ></button>
+  </div>
+  <div class="toast-body bg-dark">{{ toastEvent.body }}</div>
+</div>

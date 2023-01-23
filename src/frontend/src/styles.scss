@@ -1,0 +1,530 @@
+$tooltip-max-width: 450px;
+
+
+
+/* Define our main import here */
+@import "./@theme/theme";
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+@import "../node_modules/bootstrap/scss/bootstrap";
+@import "./styles/custom_golden_layout_styles.scss";
+
+
+/* You can add global styles to this file, and also import other style files */
+.btn-icon {
+  font-size: var(--standard-font-size);
+}
+
+
+:root {
+  --line-color: #485158;
+  --box-background-color: #2b2b2b;
+  --box-background-color-darker: #2f2f2f;
+  --footer-bar-height: 20px;
+  --header-bar-height: 25px;
+  --width-sidebar: 30px;
+  --text-secondary: #a0a0a0;
+  --thin-border-color: #1a1a1a;
+  --standard-font-size: 14px;
+  --bs-dark-rgb: 52,58,64;
+  --bs-bg-opacity: 1;
+}
+
+
+body {
+  overflow : hidden;
+}
+
+
+.table-dark{
+  --bs-table-bg: #343a40;
+  --bs-table-striped-bg: rgba(255,255,255,.05);
+  --bs-table-striped-color: var(--text-secondary);
+  --bs-table-active-bg: #373b3e;
+  --bs-table-active-color: var(--text-secondary);
+  --bs-table-hover-bg: rgba(0,0,0,.05);
+  --bs-table-hover-color: #fff;
+  color: var(--text-secondary);
+  border-color: #373b3e;
+}
+
+.btn-bar-text {
+  font-size: 13px;
+  color: whitesmoke;
+}
+
+.button {
+  color: whitesmoke;
+  border: none;
+  padding: 2px 12px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: var(--standard-font-size);
+  cursor: pointer;
+  background-color: Transparent;
+  user-select: none;
+  height: 100%;
+  /*
+  vertical-align: top;
+  */
+  white-space: nowrap;
+}
+
+.button-active {
+  background-color: darkgray;
+}
+
+.button:hover:enabled {
+  background-color: #515a64;
+}
+
+.button:disabled {
+  color: #757575 !important;
+}
+
+.button:focus {
+  outline: none;
+}
+
+.btn-tool-bar {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+hr {
+  display: block;
+  margin: 0;
+  border-style: inset;
+  border-top: 1px solid var(--line-color);
+  width: 100%;
+}
+
+.vl {
+  border-left: 1px solid var(--line-color);
+  height: 27px;
+  /*padding-top: 3px;
+  padding-bottom: 3px;
+  margin-left: 3px;
+  margin-right: 3px;*/
+}
+
+.secondary-text {
+  color: var(--text-secondary);
+  font-size: var(--standard-font-size);
+}
+
+.secondary-text-color {
+  color: var(--text-secondary);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-help {
+  cursor: help;
+}
+
+/*style scroll bars*/
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--box-background-color);
+}
+
+/* Track */
+::-webkit-scrollbar-track:hover {
+  background: var(--box-background-color);
+}
+
+/* Track */
+::-webkit-scrollbar-track:hover {
+  background: #444;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+.font-large {
+  font-size: large;
+}
+
+.warning-highlight{
+  background-color: rgba(255, 255, 0, 0.333);
+}
+
+.imbalanced-parenthesis{
+  border-bottom : 1.5px solid;
+  border-color: red;
+}
+
+code {
+  color: var(--text-secondary);
+}
+
+.swal2-modal {
+  background-color: var(--box-background-color) !important;
+}
+
+.swal2-html-container {
+  text-align: left !important;
+}
+
+.container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.row>* {
+  padding-left: unset;
+  padding-right: unset;
+}
+
+th {
+  --bs-table-accent-bg: transparent !important;
+}
+
+/*
+  Classes for the process tree SVG elements are used to easily differentiate the elements
+  and to add style that changes dynamically. Thus easier subtype specific selections can be made
+  and the styling can be stripped before tree export
+
+  Used but Empty classes are:
+
+    .node
+    .node-operator
+    .node-visible-activity
+    .node-invisible-activity
+    .node-text
+
+*/
+
+.frozen-node-operator {
+  fill: #25306a !important;
+}
+
+.frozen-node-visible-activity {
+  fill: #425bbf !important;
+}
+
+.frozen-node-invisible-activity {
+  fill: #161e40 !important;
+}
+
+.frozen-edge{
+  stroke : #425bbf;
+}
+
+.selected-node{
+  stroke : #dc3545 !important;
+}
+
+.selected-edge{
+  stroke : #dc3545 !important;
+}
+
+.logical-operator{
+  color :rgb(65, 141, 213);
+}
+
+.query-operator{
+  color :rgb(65, 141, 213);
+}
+
+.number-operator{
+  color :rgb(238, 205, 21);
+}
+
+.syntax-operator{
+  color :rgb(255, 255, 255);
+}
+
+.syntax-info {
+  background-color: rgba(0, 0, 0, 0.4);
+  position: absolute;
+  font-size: small;
+  bottom: 0;
+  left: 0;
+  text-align: left;
+  cursor: auto;
+}
+
+.syntax-info ul {
+  margin-bottom: 0;
+}
+
+.grid {
+  background-image: radial-gradient(var(--line-color) 1px, transparent 0px);
+  background-size: 20px 20px;
+}
+
+.h-line-modal-bottom {
+  border-bottom:1px solid var(--line-color);
+}
+
+.h-line-modal-top {
+  border-top:1px solid var(--line-color);
+}
+
+.tooltip-table{
+  border-collapse: collapse;
+  border: none;
+  width: 100%;
+}
+
+.nav-link {
+  border: none !important;
+  background-color: transparent !important;
+  color: #495057 !important;
+
+  &.active {
+    background-color: none !important;
+    border-bottom: 1px solid whitesmoke !important;
+    color: whitesmoke !important;
+  }
+}
+
+.nav-tabs {
+  border-bottom: none;
+}
+
+.accordion-button {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+  color: whitesmoke !important;
+  display: flex;
+  justify-content: space-between;
+
+  .collapsed {
+    background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+  }
+}
+
+.accordion-button:focus,.accordion-button:active {
+  outline: none !important;
+  box-shadow: none;
+}
+
+.accordion-item {
+  border-left: none;
+  border-right: none;
+  background-color: unset;
+
+  border-bottom-right-radius: unset;
+  border-bottom-left-radius: unset;
+
+  table {
+    margin: 0;
+  }
+}
+
+.dialog {
+  background-color: var(--box-background-color);
+}
+
+.dialog-label {
+  font-size: var(--standard-font-size);
+}
+
+.standard-font-size {
+  font-size: var(--standard-font-size);
+}
+
+.styled-input-field, .styled-input-field:focus {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+  padding : 0.45rem;
+  border-radius: 0.25rem;
+  color : var(--text-secondary);
+  font-size : small;
+}
+
+.form-select.styled-select {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity));
+  color : var(--text-secondary);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='white' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+.tab-content {
+  overflow: auto;
+}
+
+.performance-tooltip-hr {
+  height: 2px;
+  opacity: 100%;
+  margin-top: 5px
+}
+/* Make the color picker looks more cortado-y */
+
+.color-picker {
+  background-color: var(--box-background-color) !important;
+  z-index: 99999 !important;
+}
+
+.color-picker .hex-text .box div,
+.color-picker .cmyk-text .box div,
+.color-picker .hsla-text .box div,
+.color-picker .rgba-text .box div,
+.color-picker .value-text .box div {
+  color: var(--text-secondary) !important;
+}
+
+.color-picker .type-policy {
+  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAAgCAYAAAAffCjxAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAEKSURBVEhL7ZXBDoIwDIaZJPoqEk6GBzHhyKtw5lU4En0YHoSjRsV16RY2WoqTi4lfQtqR7qddt5FINE0zwoNDFoWWJBSo65qN36GdoUUe6DqodxZWSJOinUK9M5CpSmtClTjLSIu80GWhYjyhPM/32iw2AFEY6/CEqqq6oSsSxrqvS+vCYdfLZLTUVgk715bGtnUFZq6KLSkkHYbhlGXZEcdRdF13RffPT6GKoriUZXnGcRTQ/s02pDlw34rBwbVn7Yk2BjN3s2vECQGfik3vbu+GbNv2gK5IGOsJ9X1/12ZNViPGOrzSLFKJ1O+IFAI4MUoE8EoLoLYEu03YjIAwKy6bVYCYvC2S5A27y2RrXIt7DgAAAABJRU5ErkJggg==) !important;
+}
+
+.cp-button {
+  border: solid !important;
+  border-width: 1px !important;
+  border-radius: 5px;
+  color: var(--text-secondary);
+}
+
+.variant-performance-button {
+  padding: 1px 5px 1px 5px;
+  margin-right: 5px;
+}
+
+.selected-variant-performance {
+  border: solid grey !important;
+  border-radius: 5px !important;
+}
+
+.light-dashed-border {
+  border-radius: 5px;
+  border: 1px dashed lightgrey;
+}
+
+.selected-polygon {
+  stroke: whitesmoke !important;
+  stroke-width: 3 !important;
+  stroke-dasharray: 2;
+}
+
+
+.selected-bpmn-operator{
+  outline: dashed 1px red;
+  outline-offset: 5px;
+}
+
+.selected-bpmn-event{
+
+  rect {
+    stroke: red;
+    stroke-width: 2px;
+    stroke-dasharray: 0;
+  }
+
+  text {
+    stroke : None;
+  }
+
+  stroke: red;
+  stroke-width: 1px;
+  stroke-dasharray: 4;
+  marker-end: url('#arrow-red');
+
+}
+
+.selected-subvariant {
+  stroke-width: 3 !important;
+}
+
+.subvariant-rect {
+  stroke-width: 0;
+  stroke: white;
+  stroke-dasharray: 2 1;
+}
+
+.cortadoLogo {
+  animation: pulse 2s infinite ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.2);
+  }
+  50% {
+    transform: scale(0.3);
+  }
+  100% {
+    transform: scale(0.2);
+  }
+}
+
+.loadingIndicatorContainer {
+  width:100vw !important;
+  height: 100vh !important;
+  background-color: var(--box-background-color);
+}
+
+.activity-button-out{
+  filter : opacity(0.35);
+}
+
+.activity-button-in{
+  filter: brightness(1.4) drop-shadow(2px 4px 6px black);
+}
+
+.collapsed-golden-layout-container{
+  background-color: var(--box-background-color);
+}
+
+.collapsed-golden-layout-container.horizontal-dots::after{
+  content : url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' fill='white' viewBox='0 3 9 12'%3E%3Cpath d='M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z'/%3E%3C/svg%3E");
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform:translate(-50%, -50%);
+  color: white;
+}
+
+
+.collapsed-golden-layout-container.vertical-dots::after{
+  content : url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' fill='white%0A' class='bi bi-three-dots-vertical' viewBox='2 0 12 12'%3E%3Cpath d='M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z'/%3E%3C/svg%3E");
+  position: absolute;
+  display: block;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform:translate(-50%, -50%);
+  color: white;
+}
+
+tr:hover > td .remove-variant-button {
+  display: inline !important;
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+}
+
+tr:hover > .fixed-right {
+  background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;
+}
+
+.remove-variant-button {
+  display: none;
+  background-color: var(--box-background-color);
+}
+
+.custom-dropdown {
+  font-size: small;
+  max-height: 90vh;
+  user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-select: none;
+}

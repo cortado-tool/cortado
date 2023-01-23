@@ -1,0 +1,67 @@
+<footer class="footer bg-dark">
+  <div class="clearfix pe-1 ps-1 user-select-none">
+    <ng-container *ngIf="currentTask">
+      <div
+        class="spinner-border spinner-border-sm text-primary"
+        role="status"
+      ></div>
+      <span class="sr-only ps-1">Loading...</span>
+
+      <span class="fw-light">
+        ( {{ currentTask.Description | lowercase }} )
+      </span>
+      <span class="fw-light" *ngIf="numberTasks > 1">
+        (remaining tasks: {{ numberTasks | number }})
+      </span>
+      <span style="cursor: pointer" *ngIf="isCancelableTask()">
+        <i class="bi bi-x text-danger" (click)="cancelCurrentRequest()"></i>
+      </span>
+    </ng-container>
+
+    <span class="float-end text-secondary">
+      <ng-template #backendRunningTooltip>
+        indicates whether the backend is running:
+        <br /><i class="text-success bi bi-circle-fill">
+          backend is available</i
+        >
+        <br /><i class="text-danger bi bi-circle-fill">
+          backend is unavailable</i
+        >
+      </ng-template>
+      <a [ngbTooltip]="backendRunningTooltip" container="body">
+        <i *ngIf="isRunning" class="text-success bi bi-circle-fill"></i>
+        <i *ngIf="!isRunning" class="text-danger bi bi-circle-fill"></i>
+      </a>
+
+      <span class="vl ms-2 me-2"></span>
+
+      <a
+        class="cursor-pointer text-decoration-none"
+        (click)="restartBackend()"
+        ngbTooltip="restart backend"
+        container="body"
+      >
+        <i class="bi bi-arrow-clockwise"></i> restart backend
+      </a>
+      <span class="vl ms-2 me-2"></span>
+
+      <a href="mailto:cortado@fit.fraunhofer.de" class="text-decoration-none"
+        ><i class="bi bi-question-circle"></i> contact</a
+      >
+
+      <span class="vl ms-2 me-2"></span>
+      <a
+        href="https://cortado.fit.fraunhofer.de/#download"
+        class="text-decoration-none"
+        target="_blank"
+        ngbTooltip="Check for updates"
+        container="body"
+        >version {{ version }}</a
+      >
+
+      <span class="vl ms-2 me-2"></span>
+      powered by
+      <img src="assets/pm4py-logo.svg" height="20" />
+    </span>
+  </div>
+</footer>

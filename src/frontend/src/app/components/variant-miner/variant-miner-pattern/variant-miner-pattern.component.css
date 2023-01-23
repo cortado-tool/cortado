@@ -1,0 +1,16 @@
+.border-lightgrey{
+  border-color: rgb(106, 106, 106, 0.6) !important;
+}
+
+.center-element{
+  border-color: rgb(106, 106, 106, 0.2) !important;
+  border-right-width: 1px;
+  border-left-width: 1px;
+}
+
+.variant-spacer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+

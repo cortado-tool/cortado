@@ -1,0 +1,18 @@
+.footer {
+  /*background-color: var(--box-background-color);*/
+  left: 0;
+  bottom: 0;
+  position: fixed;
+  width: 100%;
+  color:whitesmoke;
+  font-size: small;
+  max-height: 20px;
+  z-index: 6;
+  border-top: 1px solid #101010;
+}
+
+.footer > .container {
+  padding-right: 1px;
+  padding-left: 1px;
+}
+

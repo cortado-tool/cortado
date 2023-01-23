@@ -1,0 +1,25 @@
+table {
+  td:nth-child(2) {
+    width: 100%;
+  }
+
+  td:first-child {
+    white-space: nowrap;
+  }
+}
+
+thead {
+  cursor: pointer;
+}
+
+.performance-table-value {
+  width: 40% !important;
+}
+
+.performance-table-metric {
+  width: 20% !important;
+}
+
+.performance-table-heading {
+  width: 35% !important;
+}

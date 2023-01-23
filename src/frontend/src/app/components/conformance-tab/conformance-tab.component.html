@@ -1,0 +1,158 @@
+<ul class="nav nav-tabs bg-dark" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link active button"
+      id="model-selection-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#model-selection"
+      role="tab"
+      aria-controls="model-selection"
+      aria-selected="true"
+    >
+      Model Selection
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button
+      class="nav-link button"
+      id="color-map-tab"
+      data-bs-toggle="tab"
+      data-bs-target="#color-map"
+      role="tab"
+      aria-controls="color-map"
+      aria-selected="true"
+      #colorMapTab
+    >
+      Color Map
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content">
+  <div
+    class="tab-pane fade show active"
+    id="model-selection"
+    role="tabpanel"
+    aria-labelledby="model-selection-tab"
+  >
+    <div
+      *ngIf="
+        modelViewModeService.viewMode === VM.CONFORMANCE;
+        else unavailableInfoNodeSelection
+      "
+      style="overflow: auto; display: flex; flex-direction: column"
+    >
+      <app-tree-string-renderer
+        [styled_tree_string]="processTreeService.selectedTree?.toString()"
+      ></app-tree-string-renderer>
+      <table
+        class="table table-sm table-striped table-dark table-hover table-bordered mb-0"
+        style="font-size: small; margin-top: 5px"
+      >
+        <tbody>
+          <tr>
+            <td>
+              Conformance weighted equally
+
+              <i
+                class="bi bi-info-circle"
+                ngbTooltip="The conformance is the mean value of all sub-trees. Leaf nodes have the conformance value based on the fraction of alignments where the model and log move was aligned."
+                container="body"
+              ></i>
+            </td>
+            <td style="width: 20%">
+              {{
+                (
+                  processTreeService.selectedTree.conformance?.weighted_equally
+                    .value * 100
+                ).toFixed(2)
+              }}%
+            </td>
+          </tr>
+          <ng-container
+            *ngIf="
+              processTreeService.selectedTree.conformance?.weighted_by_counts
+            "
+          >
+            <tr>
+              <td>
+                Conformance weighted by frequencies
+                <i
+                  class="bi bi-info-circle"
+                  ngbTooltip="The conformance is the mean value of all sub-trees, where each sub-tree is weighted by the activity frequency within that tree. Leaf nodes have the conformance value based on the fraction of alignments where the model and log move was aligned."
+                  container="body"
+                ></i>
+              </td>
+              <td>
+                {{
+                  (
+                    processTreeService.selectedTree.conformance
+                      ?.weighted_by_counts.value * 100
+                  ).toFixed(2)
+                }}%
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Activity Frequency
+                <i
+                  class="bi bi-info-circle"
+                  ngbTooltip="The activity frequency is the number of times a model move occured within the alignments. Concurrency within the traces is treated by evaluating all sequential traces that can be created with the given concurrency. The values of sub-trees are the sum of its childs."
+                  container="body"
+                ></i>
+              </td>
+              <td>
+                {{
+                  processTreeService.selectedTree.conformance
+                    ?.weighted_by_counts.weight
+                }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #unavailableInfoNodeSelection>
+      <app-unavailable-info>
+        No conformance values available.
+        <br />
+        Discover a tree model and compute the conformance for a variant in the
+        variant explorer by switching to the <strong>Conformance Mode</strong>
+        and clicking on the
+        <i class="bi bi-map" style="color: white"></i> symbol.
+        <br />
+        Then you can select a tree node for detailed conformance values.
+      </app-unavailable-info>
+    </ng-template>
+  </div>
+  <div
+    class="tab-pane fade color-map-tab"
+    id="color-map"
+    role="tabpanel"
+    aria-labelledby="color-map-tab"
+  >
+    <div class="card text-white mb-3 w-100" style="max-width: 400px">
+      <div class="card-body">
+        <h5 class="card-title">Conformance</h5>
+
+        <div class="mb-3">
+          <select
+            class="form-select form-select-sm"
+            aria-label="variant conformance aggregation"
+            name="weightMethod"
+            (change)="conformanceWeightMethodChange($event)"
+          >
+            <option value="weighted_equally">Weighted Equally</option>
+            <option value="weighted_by_counts">Weighted By Frequency</option>
+          </select>
+        </div>
+        <app-color-map
+          [colorMapValues]="conformanceColorMapValues"
+          [timeBasedLabel]="false"
+          [excludeUpperLabel]="true"
+          suffix="%"
+        ></app-color-map>
+      </div>
+    </div>
+  </div>
+</div>
