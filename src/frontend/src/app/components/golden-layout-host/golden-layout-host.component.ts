@@ -30,6 +30,7 @@ import {
 } from '../../services/goldenLayoutService/golden-layout-component.service';
 import { BpmnEditorComponent } from '../bpmn-editor/bpmn-editor.component';
 import { VariantModelerComponent } from '../variant-modeler/variant-modeler.component';
+import { VariantQueryModelerComponent } from '../variant-query-modeler/variant-query-modeler.component';
 import { InfoBoxComponent } from '../info-box/info-box.component';
 import { LayoutChangeDirective } from 'src/app/directives/layout-change/layout-change.directive';
 
@@ -149,6 +150,11 @@ export class GoldenLayoutHostComponent implements OnDestroy {
     this.goldenLayoutComponentService.registerComponentType(
       VariantModelerComponent.componentName,
       VariantModelerComponent
+    );
+
+    this.goldenLayoutComponentService.registerComponentType(
+      VariantQueryModelerComponent.componentName,
+      VariantQueryModelerComponent
     );
 
     this.goldenLayoutComponentService.registerComponentType(

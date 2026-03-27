@@ -18,6 +18,7 @@ import { DocumentationService } from '../documentation/documentation.service';
 import { VariantViewModeService } from 'src/app/services/viewModeServices/variant-view-mode.service';
 import { ViewMode } from 'src/app/objects/ViewMode';
 import { LogExportService } from 'src/app/services/logExportService/log-export.service';
+import { VariantQueryModelerComponent } from '../variant-query-modeler/variant-query-modeler.component';
 
 @Component({
   selector: 'app-header-bar',
@@ -254,6 +255,37 @@ export class HeaderBarComponent implements OnDestroy {
       id: componentID,
       type: 'component',
       title: 'Variant Modeler',
+      isClosable: true,
+      reorderEnabled: true,
+      header: {
+        show: Side.left,
+      },
+      componentType: componentID,
+      componentState: { cssParentClass: 'variant-modeler-stack' },
+    };
+
+    this.goldenLayoutComponentService.openWindow(
+      componentID,
+      ProcessTreeEditorComponent.componentName,
+      LocationSelectors,
+      itemConfig
+    );
+  }
+
+  openVariantQueryModeler() {
+    const componentID = VariantQueryModelerComponent.componentName;
+
+    const LocationSelectors: LayoutManager.LocationSelector[] = [
+      {
+        typeId: LayoutManager.LocationSelector.TypeId.FocusedStack,
+        index: undefined,
+      },
+    ];
+
+    const itemConfig: ComponentItemConfig = {
+      id: componentID,
+      type: 'component',
+      title: 'Variant Query Modeler',
       isClosable: true,
       reorderEnabled: true,
       header: {

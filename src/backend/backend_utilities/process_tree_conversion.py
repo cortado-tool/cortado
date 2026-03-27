@@ -7,9 +7,9 @@ from pm4py.objects.process_tree.obj import Operator, ProcessTree
 
 SEQUENCE_CHAR = "\u2794"
 CHOICE_CHAR = "\u2715"
-LOOP_CHAR = "\u21BA"
+LOOP_CHAR = "\u21ba"
 PARALLELISM_CHAR = "\u2227"
-TAU_CHAR = "\u03C4"
+TAU_CHAR = "\u03c4"
 
 
 def process_tree_to_dict(

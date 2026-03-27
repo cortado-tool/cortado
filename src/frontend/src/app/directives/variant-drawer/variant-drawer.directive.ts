@@ -2,6 +2,7 @@ import { VARIANT_Constants } from './../../constants/variant_element_drawer_cons
 
 import {
   AfterViewInit,
+  asNativeElements,
   Directive,
   ElementRef,
   EventEmitter,
@@ -21,16 +22,22 @@ import {
   SelectableState,
 } from 'src/app/objects/Variants/infix_selection';
 import {
+  AnythingNode,
   ChoiceGroup,
+  EndNode,
   FallthroughGroup,
   InvisibleSequenceGroup,
   LeafNode,
   LoopGroup,
+  OptionalGroup,
   ParallelGroup,
+  RepeatGroup,
   SequenceGroup,
   SkipGroup,
+  StartNode,
   VariantElement,
   WaitingTimeNode,
+  WildcardNode,
 } from 'src/app/objects/Variants/variant_element';
 import { textColorForBackgroundColor } from 'src/app/utils/render-utils';
 import { ViewMode } from 'src/app/objects/ViewMode';
@@ -40,6 +47,11 @@ import { takeUntil } from 'rxjs/operators';
 import { IVariant } from 'src/app/objects/Variants/variant_interface';
 import { ConformanceCheckingService } from 'src/app/services/conformanceChecking/conformance-checking.service';
 import { VariantService } from '../../services/variantService/variant.service';
+import { ContextMenuService } from '@perfectmemory/ngx-contextmenu';
+import { Variant } from 'src/app/objects/Variants/variant';
+import { VariantQueryModelerContextMenuComponent } from 'src/app/components/variant-query-modeler/variant-query-modeler-context-menu/variant-query-modeler-context-menu.component';
+import { range } from 'lodash';
+import { start } from 'repl';
 
 @Directive({
   selector: '[appVariantDrawer]',
@@ -60,7 +72,8 @@ export class VariantDrawerDirective
     private sharedDataService: SharedDataService, //edited
     private variantViewModeService: VariantViewModeService,
     private conformanceCheckingService: ConformanceCheckingService,
-    private variantService: VariantService
+    private variantService: VariantService,
+    private contextMenuService: ContextMenuService<any>
   ) {
     this.svgHtmlElement = elRef;
   }
@@ -69,6 +82,9 @@ export class VariantDrawerDirective
 
   @Input()
   variant: IVariant;
+
+  @Input()
+  contextMenuComponent: VariantQueryModelerContextMenuComponent;
 
   @Input()
   traceInfixSelectionMode: boolean = false;
@@ -116,6 +132,9 @@ export class VariantDrawerDirective
   selection = new EventEmitter<Selection<any, any, any, any>>();
 
   @Output() redrawArcsIfComputed = new EventEmitter();
+
+  @Output()
+  operatorAction = new EventEmitter<any>();
 
   svgSelection!: Selection<any, any, any, any>;
 
@@ -323,7 +342,628 @@ export class VariantDrawerDirective
       this.drawLoopGroup(element.asLoopGroup(), svgElement);
     } else if (element instanceof SkipGroup) {
       this.drawSkipGroup(element.asSkipGroup(), svgElement);
+    } else if (element instanceof OptionalGroup) {
+      this.drawOptionalGroup(element.asOptionalGroup(), svgElement);
+    } else if (element instanceof RepeatGroup) {
+      this.drawRepeatGroup(element.asRepeatGroup(), svgElement);
+    } else if (element instanceof StartNode) {
+      this.drawStartNode(element.asStartNode(), svgElement);
+    } else if (element instanceof EndNode) {
+      this.drawEndNode(element.asEndNode(), svgElement);
+    } else if (element instanceof AnythingNode) {
+      this.drawAnythingNode(element.asAnythingNode(), svgElement);
+    } else if (element instanceof WildcardNode) {
+      this.drawWildcardNode(element.asWildcardNode(), svgElement);
     }
+  }
+
+  private ensurePattern(
+    svg: d3.Selection<SVGSVGElement, any, any, any>,
+    type: string
+  ) {
+    const defs = svg.select('defs').empty()
+      ? svg.append('defs')
+      : svg.select('defs');
+
+    const tile = 80;
+    const marks = [
+      { x: 15, y: 30, s: 19, o: 0.4 },
+      { x: 45, y: 55, s: 14, o: 0.4 },
+      { x: 65, y: 30, s: 12, o: 0.4 },
+      { x: 25, y: 75, s: 14, o: 0.4 },
+    ];
+
+    if (type === 'repeat') {
+      if (!defs.select('#repeat-loops').empty()) return;
+
+      const pat = defs
+        .append('pattern')
+        .attr('id', 'repeat-loops')
+        .attr('patternUnits', 'userSpaceOnUse') // <- keeps tile size constant
+        .attr('width', tile)
+        .attr('height', tile);
+
+      pat
+        .append('rect')
+        .attr('width', tile)
+        .attr('height', tile)
+        .attr('fill', 'lightgray')
+        .attr('opacity', 1);
+
+      pat
+        .selectAll('text.rl')
+        .data(marks)
+        .enter()
+        .append('text')
+        .attr('class', 'rl')
+        .attr('x', (d) => d.x)
+        .attr('y', (d) => d.y)
+        .attr('fill', '#383838')
+        .attr('font-size', (d) => d.s)
+        .attr('opacity', (d) => d.o)
+        .text('⟳');
+    } else if (type === 'optional') {
+      if (!defs.select('#optional-qmarks').empty()) return;
+
+      const pat = defs
+        .append('pattern')
+        .attr('id', 'optional-qmarks')
+        .attr('patternUnits', 'userSpaceOnUse') // <- keeps tile size constant
+        .attr('width', tile)
+        .attr('height', tile);
+
+      pat
+        .append('rect')
+        .attr('width', tile)
+        .attr('height', tile)
+        .attr('fill', 'lightgray')
+        .attr('opacity', 1);
+
+      pat
+        .selectAll('text.qm')
+        .data(marks)
+        .enter()
+        .append('text')
+        .attr('class', 'qm')
+        .attr('x', (d) => d.x)
+        .attr('y', (d) => d.y)
+        .attr('fill', '#383838')
+        .attr('font-size', (d) => d.s)
+        .attr('opacity', (d) => d.o)
+        .text('?');
+    } else if (type === 'fallthrough') {
+      if (!defs.select('#fallthrough-arrows').empty()) return;
+      const tile = 80;
+      const marks = [
+        { x: 5, y: 15, s: 19, o: 0.4 },
+        { x: 15, y: 35, s: 17, o: 0.4 },
+        { x: 35, y: 55, s: 14, o: 0.4 },
+        { x: 65, y: 30, s: 12, o: 0.4 },
+        { x: 55, y: 55, s: 12, o: 0.4 },
+        { x: 25, y: 75, s: 14, o: 0.4 },
+      ];
+      const pat = defs
+        .append('pattern')
+        .attr('id', 'fallthrough-arrows')
+        .attr('patternUnits', 'userSpaceOnUse') // <- keeps tile size constant
+        .attr('width', tile)
+        .attr('height', tile);
+
+      pat
+        .append('rect')
+        .attr('width', tile)
+        .attr('height', tile)
+        .attr('fill', 'lightgray')
+        .attr('opacity', 1);
+
+      pat
+        .selectAll('text.fa')
+        .data(marks)
+        .enter()
+        .append('text')
+        .attr('class', 'fa')
+        .attr('x', (d) => d.x)
+        .attr('y', (d) => d.y)
+        .attr('fill', '#383838')
+        .attr('font-size', (d) => d.s)
+        .attr('opacity', (d) => d.o)
+        .text('⇆');
+    } else if (type === 'wildcard') {
+      if (!defs.select('#wildcard-pattern').empty()) return;
+      const tile = 20;
+
+      const pat = defs
+        .append('pattern')
+        .attr('id', 'wildcard-pattern')
+        .attr('patternUnits', 'userSpaceOnUse')
+        .attr('width', tile)
+        .attr('height', tile);
+
+      pat
+        .append('rect')
+        .attr('width', tile)
+        .attr('height', tile)
+        .attr('fill', 'lightgray')
+        .attr('opacity', 1);
+
+      pat
+        .selectAll('text.star')
+        .data([
+          { x: 0, y: 0 },
+          { x: 12, y: 4 },
+          { x: 3, y: 14 },
+          { x: 14, y: 14 },
+          { x: 7, y: 6 },
+        ])
+        .enter()
+        .append('text')
+        .attr('x', (d) => d.x)
+        .attr('y', (d) => d.y)
+        .attr('fill', '#383838')
+        .attr('font-size', 6)
+        .attr('opacity', 0.25)
+        .text('★');
+    } else if (type === 'anything') {
+      if (!defs.select('#anything-subprocess').empty()) return;
+      const tile = 120;
+      const pat = defs
+        .append('pattern')
+        .attr('id', 'anything-subprocess')
+        .attr('patternUnits', 'userSpaceOnUse')
+        .attr('width', tile)
+        .attr('height', tile);
+
+      pat
+        .append('rect')
+        .attr('width', tile)
+        .attr('height', tile)
+        .attr('fill', 'lightgray')
+        .attr('opacity', 1);
+
+      pat
+        .append('image')
+        .attr('href', 'assets/png/any_node_background.png')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', tile)
+        .attr('opacity', 0.25);
+    }
+  }
+
+  public drawOptionalGroup(
+    element: OptionalGroup,
+    parent: Selection<any, any, any, any>
+  ): void {
+    const width = element.getWidth();
+    const height = element.getHeight();
+
+    let operator_font_size = VARIANT_Constants.FONT_SIZE_OPERATOR;
+    let operator_font_color = '#383838ff';
+
+    const polygonPoints = this.polygonService.getPolygonPoints(width, height);
+
+    const operatorColor = 'transparent';
+    let laElement = getLowestSelectionActionableElement(element);
+    let actionable =
+      laElement.parent !== null &&
+      laElement.infixSelectableState !== SelectableState.None;
+
+    let polygon = this.createPolygon(
+      parent,
+      polygonPoints,
+      operatorColor,
+      actionable,
+      true
+    );
+    const svg = d3.select(this.svgHtmlElement.nativeElement) as any;
+    this.ensurePattern(svg, 'optional');
+    polygon.style('fill', 'url(#optional-qmarks)');
+
+    if (
+      this.traceInfixSelectionMode &&
+      element.parent &&
+      !(element instanceof InvisibleSequenceGroup)
+    ) {
+      this.addInfixSelectionAttributes(element, polygon, false);
+    }
+
+    if (
+      element instanceof InvisibleSequenceGroup ||
+      element.parent instanceof SkipGroup
+    ) {
+      polygon.style('fill', 'transparent');
+    } else {
+      if (this.onClickCbFc) {
+        parent.on('click', (e: PointerEvent) => {
+          this.onVariantClick(element);
+          e.stopPropagation();
+        });
+      }
+    }
+
+    let xOffset = 0;
+
+    const inEditor =
+      d3
+        .select(this.svgHtmlElement.nativeElement)
+        .classed('in-variant-modeler') ||
+      d3.select(this.svgHtmlElement.nativeElement).classed('pattern-variant');
+
+    xOffset +=
+      element.getHeadLength() +
+      element.getMarginX() -
+      element.elements[0].getHeadLength();
+
+    xOffset += VARIANT_Constants.MARGIN_X;
+
+    // Add small operator icons at the top-right of the wrapper
+    const iconsGroup = parent.append('g');
+
+    const optionalGroup = iconsGroup.append('g');
+
+    let yOffset = VARIANT_Constants.MARGIN_Y + operator_font_size / 2;
+
+    // background rect (rounded)
+    const optionalText = optionalGroup
+      .append('text')
+      .attr('display', 'block')
+      .attr('x', width / 2)
+      .attr('y', yOffset)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', operator_font_size)
+      .attr('fill', operator_font_color)
+      .attr('font-weight', 'bold')
+      .classed('activity-text', true)
+      .text('Optional');
+
+    optionalGroup.style('display', 'inline');
+
+    for (const child of element.elements) {
+      if (
+        child instanceof WaitingTimeNode &&
+        (this.keepStandardView ||
+          this.variantViewModeService.viewMode !== ViewMode.PERFORMANCE)
+      ) {
+        continue;
+      }
+
+      const childWidth = child.getWidth(
+        !this.keepStandardView &&
+          this.variantViewModeService.viewMode === ViewMode.PERFORMANCE
+      );
+      const childHeight = child.getHeight();
+      const yOffset = height / 2 - childHeight / 2;
+      const g = parent
+        .append('g')
+        .attr('transform', `translate(${xOffset}, ${yOffset})`);
+
+      this.draw(child, g, false);
+      xOffset += childWidth;
+    }
+
+    if (this.onClickCbFc) {
+      parent.on('click', (e: PointerEvent) => {
+        this.onVariantClick(element);
+        e.stopPropagation();
+      });
+    }
+
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
+      parent.on('contextmenu', (e: PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
+      });
+    }
+
+    if (this.onMouseOverCbFc) {
+      this.onMouseOverCbFc(this, element, this.variant, parent);
+    }
+  }
+
+  public drawRepeatGroup(
+    element: RepeatGroup,
+    parent: Selection<any, any, any, any>
+  ): void {
+    const width = element.getWidth();
+    const height = element.getHeight();
+
+    const repeatCountMin = element.getRepeatCountMin();
+    const repeatCountMax = element.getRepeatCountMax();
+
+    let operator_font_size = VARIANT_Constants.FONT_SIZE_OPERATOR;
+    let operator_font_color = '#383838ff';
+
+    const polygonPoints = this.polygonService.getPolygonPoints(width, height);
+
+    const operatorColor = 'transparent';
+    let laElement = getLowestSelectionActionableElement(element);
+    let actionable =
+      laElement.parent !== null &&
+      laElement.infixSelectableState !== SelectableState.None;
+
+    let polygon = this.createPolygon(
+      parent,
+      polygonPoints,
+      operatorColor,
+      actionable,
+      true
+    );
+    const svg = d3.select(this.svgHtmlElement.nativeElement) as any;
+    this.ensurePattern(svg, 'repeat');
+    polygon.style('fill', 'url(#repeat-loops)');
+
+    if (
+      this.traceInfixSelectionMode &&
+      element.parent &&
+      !(element instanceof InvisibleSequenceGroup)
+    ) {
+      this.addInfixSelectionAttributes(element, polygon, false);
+    }
+
+    if (
+      element instanceof InvisibleSequenceGroup ||
+      element.parent instanceof SkipGroup
+    ) {
+      polygon.style('fill', 'transparent');
+    } else {
+      if (this.onClickCbFc) {
+        parent.on('click', (e: PointerEvent) => {
+          this.onVariantClick(element);
+          e.stopPropagation();
+        });
+      }
+    }
+
+    let xOffset = 0;
+
+    xOffset +=
+      element.getHeadLength() +
+      element.getMarginX() -
+      element.elements[0].getHeadLength();
+
+    xOffset += VARIANT_Constants.MARGIN_X;
+
+    // Add small operator icons at the top-right of the wrapper
+    const iconsGroup = parent.append('g');
+
+    let yOffset = VARIANT_Constants.MARGIN_Y + operator_font_size / 2;
+
+    const repeatGroup = iconsGroup.append('g');
+
+    const repeatTextMin = repeatGroup
+      .append('text')
+      .attr('display', 'block')
+      .attr('x', width / 2)
+      .attr('y', yOffset)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'end')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', operator_font_size)
+      .attr('font-weight', 'bold')
+      .attr('fill', operator_font_color)
+      .classed('activity-text', true)
+      .text(`⟳ ${repeatCountMin} -`);
+
+    // Limit display of max repeats to 200
+    let repeatCountMaxText = '∞';
+    if (repeatCountMax < 200) {
+      repeatCountMaxText = `${repeatCountMax}`;
+    }
+
+    const repeatTextMax = repeatGroup
+      .append('text')
+      .attr('display', 'block')
+      .attr('x', width / 2 + 2)
+      .attr('y', yOffset)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'start')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', operator_font_size)
+      .attr('font-weight', 'bold')
+      .attr('fill', operator_font_color)
+      .classed('activity-text', true)
+      .text(repeatCountMaxText);
+
+    (repeatTextMin as any).on('click', (event: PointerEvent) => {
+      event.stopPropagation();
+      this.onMinRepeatClick(
+        repeatTextMin.node() as SVGGraphicsElement,
+        element
+      );
+    });
+
+    (repeatTextMax as any).on('click', (event: PointerEvent) => {
+      event.stopPropagation();
+      this.onMaxRepeatClick(
+        repeatTextMax.node() as SVGGraphicsElement,
+        element
+      );
+    });
+
+    repeatGroup.style('display', 'inline');
+
+    for (const child of element.elements) {
+      if (
+        child instanceof WaitingTimeNode &&
+        (this.keepStandardView ||
+          this.variantViewModeService.viewMode !== ViewMode.PERFORMANCE)
+      ) {
+        continue;
+      }
+
+      const childWidth = child.getWidth(
+        !this.keepStandardView &&
+          this.variantViewModeService.viewMode === ViewMode.PERFORMANCE
+      );
+      const childHeight = child.getHeight();
+      const yOffset = height / 2 - childHeight / 2;
+      const g = parent
+        .append('g')
+        .attr('transform', `translate(${xOffset}, ${yOffset})`);
+
+      this.draw(child, g, false);
+      xOffset += childWidth;
+    }
+
+    if (this.onClickCbFc) {
+      parent.on('click', (e: PointerEvent) => {
+        this.onVariantClick(element);
+        e.stopPropagation();
+      });
+    }
+
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
+      parent.on('contextmenu', (e: PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
+      });
+    }
+
+    if (this.onMouseOverCbFc) {
+      this.onMouseOverCbFc(this, element, this.variant, parent);
+    }
+  }
+
+  private onMinRepeatClick(
+    circleNode: SVGGraphicsElement,
+    element: RepeatGroup
+  ) {
+    if (!circleNode) return;
+    const rect = circleNode.getBoundingClientRect();
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '1';
+    input.value = String(element.getRepeatCountMin());
+    input.style.position = 'absolute';
+    input.style.left = `${rect.left - rect.width * 0.4}px`;
+    input.style.top = `${rect.top - rect.height * 0.15}px`;
+    input.style.width = `80px`;
+    input.style.height = `50px`;
+    input.style.fontSize = `30px`;
+    input.style.zIndex = '10000';
+    input.style.padding = '2px 6px';
+    input.style.borderRadius = '4px';
+    input.style.border = '1px solid #ffffffa6';
+    input.style.backgroundColor = '#5a5a5a93';
+    (document.body || document.documentElement).appendChild(input);
+    input.focus();
+    input.select();
+
+    const cleanup = () => {
+      input.removeEventListener('keydown', onKey);
+      window.removeEventListener('mousedown', onWindowMouse);
+      if (input.parentElement) input.parentElement.removeChild(input);
+    };
+
+    const submit = () => {
+      const v = parseInt(input.value, 10);
+      if (!isNaN(v) && v >= 1) {
+        element.setRepeatCountMin(v);
+        this.redraw();
+      }
+      cleanup();
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        submit();
+      } else if (e.key === 'Escape') {
+        cleanup();
+      }
+    };
+
+    // click outside -> submit and close
+    const onWindowMouse = (e: MouseEvent) => {
+      if (e.target !== input) {
+        submit();
+      }
+    };
+
+    input.addEventListener('keydown', onKey);
+    // add outside click listener asynchronously to avoid immediate trigger
+    window.addEventListener('click', onWindowMouse);
+  }
+
+  private onMaxRepeatClick(
+    circleNode: SVGGraphicsElement,
+    element: RepeatGroup
+  ) {
+    if (!circleNode) return;
+    const rect = circleNode.getBoundingClientRect();
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '1';
+    input.value = String(element.getRepeatCountMax());
+    input.style.position = 'absolute';
+    input.style.left = `${rect.left - rect.width * 0.4}px`;
+    input.style.top = `${rect.top - rect.height * 0.15}px`;
+    input.style.width = `80px`;
+    input.style.height = `50px`;
+    input.style.fontSize = `30px`;
+    input.style.zIndex = '10000';
+    input.style.padding = '2px 6px';
+    input.style.borderRadius = '4px';
+    input.style.border = '1px solid #ffffffa6';
+    input.style.backgroundColor = '#5a5a5a93';
+    (document.body || document.documentElement).appendChild(input);
+    input.focus();
+    input.select();
+
+    const cleanup = () => {
+      input.removeEventListener('keydown', onKey);
+      window.removeEventListener('mousedown', onWindowMouse);
+      if (input.parentElement) input.parentElement.removeChild(input);
+    };
+
+    const submit = () => {
+      const v = parseInt(input.value, 10);
+      if (!isNaN(v) && v >= 1) {
+        element.setRepeatCountMax(v);
+        this.redraw();
+      }
+      cleanup();
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        submit();
+      } else if (e.key === 'Escape') {
+        cleanup();
+      }
+    };
+
+    // click outside -> submit and close
+    const onWindowMouse = (e: MouseEvent) => {
+      if (e.target !== input) {
+        submit();
+      }
+    };
+
+    input.addEventListener('keydown', onKey);
+    // add outside click listener asynchronously to avoid immediate trigger
+    window.addEventListener('click', onWindowMouse);
   }
 
   public drawLoopGroup(
@@ -418,6 +1058,234 @@ export class VariantDrawerDirective
 
     if (this.onMouseOverCbFc) {
       this.onMouseOverCbFc(this, loopGroup, this.variant, parent);
+    }
+  }
+
+  drawAnythingNode(
+    element: AnythingNode,
+    parent: Selection<any, any, any, any>
+  ) {
+    const width = element.getWidth();
+    let height = element.getHeight();
+    const polygonPoints = this.polygonService.getPolygonPoints(width, height);
+
+    const color = 'lightgray';
+
+    let laElement = getLowestSelectionActionableElement(element);
+
+    let actionable =
+      laElement.parent !== null &&
+      laElement.infixSelectableState !== SelectableState.None;
+
+    let polygon = this.createPolygon(
+      parent,
+      polygonPoints,
+      color,
+      actionable,
+      false
+    );
+
+    // Apply subprocess pattern
+    const svg = d3.select(this.svgHtmlElement.nativeElement) as any;
+    this.ensurePattern(svg, 'anything');
+    polygon.style('fill', 'url(#anything-subprocess)');
+
+    if (this.traceInfixSelectionMode) {
+      this.addInfixSelectionAttributes(element, polygon, true);
+    }
+
+    const textcolor = '#383838ff';
+
+    const activityText = parent
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height / 2)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', VARIANT_Constants.FONT_SIZE)
+      .attr('font-weight', 'bold')
+      .attr('fill', textcolor)
+      .classed('activity-text', true);
+
+    let y = height / 2;
+
+    let truncated = false;
+    let dy = 0;
+
+    element.activity.forEach((a, _i) => {
+      const tspan = activityText
+        .append('tspan')
+        .attr('x', width / 2)
+        .attr('y', y + dy)
+        .classed(
+          'cursor-pointer',
+          (!this.traceInfixSelectionMode || actionable) && this.addCursorPointer
+        )
+        .text(a);
+
+      dy += VARIANT_Constants.FONT_SIZE + VARIANT_Constants.MARGIN_Y;
+      tspan.attr(
+        'height',
+        VARIANT_Constants.FONT_SIZE + VARIANT_Constants.MARGIN_Y
+      );
+
+      const maxWidth =
+        element.getWidth() -
+        element.getHeadLength() * 2 -
+        VARIANT_Constants.MARGIN_X;
+      const tr = this.wrapInnerLabelText(tspan, a, maxWidth);
+      truncated ||= tr;
+
+      if (a === 'W_Nabellen incomplete dossiers' && !tr) {
+        console.log('Did not wrap', a, tspan, maxWidth);
+      }
+    });
+
+    if (truncated) {
+      activityText
+        .attr('title', element.activity.join(';'))
+        .attr('data-bs-toggle', 'tooltip');
+      // manually trigger tooltip through jquery
+      activityText.on('mouseenter', (e: PointerEvent, data) => {
+        // @ts-ignore
+        this.variantService.activityTooltipReference = $(e.target);
+        this.variantService.activityTooltipReference.tooltip('show');
+      });
+    }
+
+    if (this.onClickCbFc) {
+      parent.on('click', (e: PointerEvent) => {
+        this.onVariantClick(element);
+        // hide the tooltip
+        if (this.variantService.activityTooltipReference) {
+          this.variantService.activityTooltipReference.tooltip('hide');
+        }
+        e.stopPropagation();
+      });
+    }
+
+    if (this.onMouseOverCbFc) {
+      this.onMouseOverCbFc(this, element, this.variant, parent);
+    }
+  }
+
+  drawWildcardNode(
+    element: WildcardNode,
+    parent: Selection<any, any, any, any>
+  ) {
+    const width = element.getWidth();
+    let height = element.getHeight();
+    const polygonPoints = this.polygonService.getPolygonPoints(width, height);
+
+    const color = '#5a5a5ab8';
+
+    let laElement = getLowestSelectionActionableElement(element);
+
+    let actionable =
+      laElement.parent !== null &&
+      laElement.infixSelectableState !== SelectableState.None;
+
+    let polygon = this.createPolygon(
+      parent,
+      polygonPoints,
+      color,
+      actionable,
+      false
+    );
+
+    const svg = d3.select(this.svgHtmlElement.nativeElement) as any;
+    this.ensurePattern(svg, 'wildcard'); // Add new pattern type
+    polygon.style('fill', 'url(#wildcard-pattern)'); // Apply pattern
+
+    if (this.traceInfixSelectionMode) {
+      this.addInfixSelectionAttributes(element, polygon, true);
+    }
+
+    const textcolor = '#383838ff';
+
+    const activityText = parent
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height / 2)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', VARIANT_Constants.FONT_SIZE)
+      .attr('font-weight', 'bold')
+      .attr('fill', textcolor)
+      .classed('activity-text', true);
+
+    let y = height / 2;
+    if (element.activity.length > 1 && element.expanded) {
+      y =
+        height / 2 -
+        ((element.activity.length - 1) / 2) *
+          (VARIANT_Constants.FONT_SIZE + VARIANT_Constants.MARGIN_Y);
+    }
+
+    let truncated = false;
+    let dy = 0;
+
+    // When collapsed, only show first activity
+    const activitiesToShow = element.expanded
+      ? element.activity
+      : [element.activity[0]];
+
+    activitiesToShow.forEach((a, _i) => {
+      const tspan = activityText
+        .append('tspan')
+        .attr('x', width / 2)
+        .attr('y', y + dy)
+        .classed(
+          'cursor-pointer',
+          (!this.traceInfixSelectionMode || actionable) && this.addCursorPointer
+        )
+        .text(a);
+
+      dy += VARIANT_Constants.FONT_SIZE + VARIANT_Constants.MARGIN_Y;
+      tspan.attr(
+        'height',
+        VARIANT_Constants.FONT_SIZE + VARIANT_Constants.MARGIN_Y
+      );
+
+      const maxWidth =
+        element.getWidth() -
+        element.getHeadLength() * 2 -
+        VARIANT_Constants.MARGIN_X;
+      const tr = this.wrapInnerLabelText(tspan, a, maxWidth);
+      truncated ||= tr;
+
+      if (a === 'W_Nabellen incomplete dossiers' && !tr) {
+        console.log('Did not wrap', a, tspan, maxWidth);
+      }
+    });
+
+    if (truncated) {
+      activityText
+        .attr('title', element.activity.join(';'))
+        .attr('data-bs-toggle', 'tooltip');
+      // manually trigger tooltip through jquery
+      activityText.on('mouseenter', (e: PointerEvent, data) => {
+        // @ts-ignore
+        this.variantService.activityTooltipReference = $(e.target);
+        this.variantService.activityTooltipReference.tooltip('show');
+      });
+    }
+
+    if (this.onClickCbFc) {
+      parent.on('click', (e: PointerEvent) => {
+        this.onVariantClick(element);
+        // hide the tooltip
+        if (this.variantService.activityTooltipReference) {
+          this.variantService.activityTooltipReference.tooltip('hide');
+        }
+        e.stopPropagation();
+      });
+    }
+
+    if (this.onMouseOverCbFc) {
+      this.onMouseOverCbFc(this, element, this.variant, parent);
     }
   }
 
@@ -516,10 +1384,20 @@ export class VariantDrawerDirective
       this.onMouseOverCbFc(this, element, this.variant, parent);
     }
 
-    if (this.onRightMouseClickCbFc) {
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
       parent.on('contextmenu', (e: PointerEvent) => {
-        this.onRightMouseClickCbFc(this, element, this.variant, e);
+        e.preventDefault();
         e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
       });
     }
   }
@@ -561,10 +1439,20 @@ export class VariantDrawerDirective
       });
     }
 
-    if (this.onRightMouseClickCbFc) {
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
       parent.on('contextmenu', (e: PointerEvent) => {
-        this.onRightMouseClickCbFc(this, element, this.variant, e);
+        e.preventDefault();
         e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
       });
     }
 
@@ -591,10 +1479,142 @@ export class VariantDrawerDirective
     }
   }
 
+  drawChoiceGroupCollapsed(
+    element: ChoiceGroup,
+    parent: Selection<any, any, any, any>
+  ): void {
+    const width = element.getWidth();
+    const height = element.getHeight();
+
+    const polygonPoints = this.polygonService.getPolygonPoints(width, height);
+
+    let laElement = getLowestSelectionActionableElement(element);
+    let actionable =
+      laElement.parent !== null &&
+      laElement.infixSelectableState !== SelectableState.None;
+
+    const color = 'transparent';
+    let polygon = this.createPolygon(
+      parent,
+      polygonPoints,
+      color,
+      actionable,
+      true
+    );
+
+    if (
+      this.traceInfixSelectionMode &&
+      !(element instanceof InvisibleSequenceGroup)
+    ) {
+      this.addInfixSelectionAttributes(element, polygon, false);
+    }
+
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
+      parent.on('contextmenu', (e: PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
+      });
+    }
+
+    //edited
+    const textcolor = textColorForBackgroundColor(
+      color,
+      this.traceInfixSelectionMode && !element.selected
+    );
+
+    const v_height = element.getHeight();
+    const v_width = element.getWidth();
+
+    const activityText = parent
+      .append('text')
+      .attr('x', v_width / 2)
+      .attr('y', v_height / 2)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr(
+        'font-size',
+        (VARIANT_Constants.LEAF_HEIGHT + VARIANT_Constants.MARGIN_Y) * 1 +
+          VARIANT_Constants.MARGIN_Y
+      )
+      .attr('font-weight', 300)
+      .attr('fill', textcolor)
+      .classed('activity-text', true);
+
+    const marginX = VARIANT_Constants.MARGIN_X;
+    const marginY = VARIANT_Constants.MARGIN_Y;
+    const numberOfElements = element.elements.length;
+    const elementsToShow = Math.min(3, numberOfElements);
+    let y = VARIANT_Constants.MARGIN_Y - (elementsToShow / 2) * marginY;
+    if (elementsToShow == 1) {
+      y = VARIANT_Constants.MARGIN_Y;
+    }
+    let x = 2 * VARIANT_Constants.MARGIN_X;
+    let startIdx = numberOfElements - elementsToShow;
+    for (const idx of range(startIdx, numberOfElements, 1)) {
+      const child = element.elements[idx];
+      const g = parent.append('g').attr('transform', `translate(${x}, ${y})`);
+      this.draw(child, g, false);
+      y += marginY;
+      x += marginX;
+    }
+
+    const collapseButton = parent.append('g').style('cursor', 'pointer');
+
+    // background rect (rounded)
+    let circleX = width - 15;
+    let circleY = 10;
+    let radius = 20 / 2;
+    const circle = collapseButton
+      .append('circle')
+      .attr('cx', circleX)
+      .attr('cy', circleY)
+      .attr('r', radius)
+      .attr('fill', '#66666680')
+      .attr('stroke', '#ffffff8e');
+
+    collapseButton
+      .append('text')
+      .attr('x', circleX)
+      .attr('y', circleY + 1)
+      .attr('text-anchor', 'middle') // horizontal center
+      .attr('dominant-baseline', 'middle') // vertical center
+      .attr('font-size', radius * 2)
+      .attr('font-weight', 'bold')
+      .attr('fill', '#fff')
+      .style('pointer-events', 'none') // let clicks pass to the circle/group
+      .text('+');
+
+    // attach click listener directly to the polygon selection
+    (circle as any).on('click', (event: PointerEvent) => {
+      event.stopPropagation();
+      element.toggleCollapsed();
+      this.redraw();
+    });
+
+    if (this.onMouseOverCbFc) {
+      this.onMouseOverCbFc(this, element, this.variant, parent);
+    }
+  }
+
   drawChoiceGroup(
     element: ChoiceGroup,
     parent: Selection<any, any, any, any>
   ): void {
+    if (element.getCollapsed()) {
+      this.drawChoiceGroupCollapsed(element, parent);
+      return;
+    }
     const width = element.getWidth();
     const height = element.getHeight();
 
@@ -621,23 +1641,25 @@ export class VariantDrawerDirective
       this.addInfixSelectionAttributes(element, polygon, false);
     }
 
-    if (this.onClickCbFc) {
-      parent.on('click', (e: PointerEvent) => {
-        this.onVariantClick(element);
-        e.stopPropagation();
-      });
-    }
-
-    if (this.onRightMouseClickCbFc) {
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
       parent.on('contextmenu', (e: PointerEvent) => {
-        this.onRightMouseClickCbFc(this, element, this.variant, e);
+        e.preventDefault();
         e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
       });
     }
 
     let y = VARIANT_Constants.MARGIN_Y;
 
-    //edited
     const textcolor = textColorForBackgroundColor(
       color,
       this.traceInfixSelectionMode && !element.selected
@@ -680,9 +1702,10 @@ export class VariantDrawerDirective
         'cursor-pointer',
         (!this.traceInfixSelectionMode || actionable) && this.addCursorPointer
       )
+      .attr('fill', '#e0e0e0b0')
       .text('{');
 
-    for (const child of element.elements) {
+    for (const [idx, child] of element.elements.entries()) {
       if (
         child instanceof WaitingTimeNode &&
         (this.keepStandardView ||
@@ -700,6 +1723,19 @@ export class VariantDrawerDirective
           VARIANT_Constants.MARGIN_Y) /
           2.8;
       const g = parent.append('g').attr('transform', `translate(${x}, ${y})`);
+      const lineSplitter = parent
+        .append('line')
+        .attr('x1', x - 0.3 * VARIANT_Constants.MARGIN_X)
+        .attr('y1', y - 0.5 * VARIANT_Constants.MARGIN_Y)
+        .attr('x2', x + child.getWidth(true))
+        .attr('y2', y - 0.5 * VARIANT_Constants.MARGIN_Y)
+        .attr('stroke', '#d8d8d8ff')
+        .attr('stroke-width', 1)
+        .attr('stroke-dasharray', '4 2');
+
+      if (idx === 0) {
+        lineSplitter.style('display', 'none');
+      }
       this.draw(child, g, false);
       y += height + VARIANT_Constants.MARGIN_Y;
     }
@@ -722,7 +1758,43 @@ export class VariantDrawerDirective
         'cursor-pointer',
         (!this.traceInfixSelectionMode || actionable) && this.addCursorPointer
       )
+      .attr('fill', '#e0e0e0b0')
       .text('}');
+
+    // Button to collapse/expand choice group
+    const collapseButton = parent.append('g').style('cursor', 'pointer');
+
+    // background rect (rounded)
+    let circleX = width - 15;
+    let circleY = 10;
+    let radius = 20 / 2;
+    const circle = collapseButton
+      .append('circle')
+      .attr('cx', circleX)
+      .attr('cy', circleY)
+      .attr('r', radius)
+      .attr('fill', '#66666680')
+      .attr('stroke', '#ffffff8e');
+
+    collapseButton
+      .append('text')
+      .attr('x', circleX)
+      .attr('y', circleY + 1)
+      .attr('text-anchor', 'middle') // horizontal center
+      .attr('dominant-baseline', 'middle') // vertical center
+      .attr('font-size', radius * 2)
+      .attr('font-weight', 'bold')
+      .attr('fill', '#fff')
+      .style('pointer-events', 'none') // let clicks pass to the circle/group
+      .text('-');
+
+    // attach click listener directly to the polygon selection
+    (circle as any).on('click', (event: PointerEvent) => {
+      event.stopPropagation();
+      if (element.getElements().length < 2) return; // do not collapse if only one element
+      element.toggleCollapsed();
+      this.redraw();
+    });
 
     if (this.onMouseOverCbFc) {
       this.onMouseOverCbFc(this, element, this.variant, parent);
@@ -752,6 +1824,10 @@ export class VariantDrawerDirective
       true
     );
 
+    const svg = d3.select(this.svgHtmlElement.nativeElement) as any;
+    this.ensurePattern(svg, 'fallthrough');
+    polygon.style('fill', 'url(#fallthrough-arrows)');
+
     if (
       this.traceInfixSelectionMode &&
       !(element instanceof InvisibleSequenceGroup)
@@ -766,10 +1842,20 @@ export class VariantDrawerDirective
       });
     }
 
-    if (this.onRightMouseClickCbFc) {
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
       parent.on('contextmenu', (e: PointerEvent) => {
-        this.onRightMouseClickCbFc(this, element, this.variant, e);
+        e.preventDefault();
         e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
       });
     }
 
@@ -949,6 +2035,142 @@ export class VariantDrawerDirective
     }
   }
 
+  public drawStartNode(
+    element: StartNode,
+    parent: Selection<any, any, any, any>
+  ): void {
+    const width = element.getWidth(false);
+    let height = element.getHeight();
+    const polygonPoints = this.polygonService.getPolygonPoints(width, height);
+
+    const color = 'transparent';
+
+    let laElement = getLowestSelectionActionableElement(element);
+
+    let actionable =
+      laElement.parent !== null &&
+      laElement.infixSelectableState !== SelectableState.None;
+
+    let polygon = this.createPolygon(
+      parent,
+      polygonPoints,
+      color,
+      actionable,
+      false
+    );
+
+    if (this.traceInfixSelectionMode) {
+      this.addInfixSelectionAttributes(element, polygon, true);
+    }
+
+    const textcolor = 'white';
+
+    const activityText = parent
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height / 2)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', VARIANT_Constants.FONT_SIZE)
+      .attr('font-weight', 'bold')
+      .attr('fill', textcolor)
+      .classed('activity-text', true);
+
+    let y = height / 2;
+
+    let dy = 0;
+
+    const tspan = activityText
+      .append('tspan')
+      .attr('x', width / 2)
+      .attr('y', y + dy)
+      .text('START');
+
+    if (this.onClickCbFc) {
+      parent.on('click', (e: PointerEvent) => {
+        this.onVariantClick(element);
+        // hide the tooltip
+        if (this.variantService.activityTooltipReference) {
+          this.variantService.activityTooltipReference.tooltip('hide');
+        }
+        e.stopPropagation();
+      });
+    }
+
+    if (this.onMouseOverCbFc) {
+      this.onMouseOverCbFc(this, element, this.variant, parent);
+    }
+  }
+
+  public drawEndNode(
+    element: EndNode,
+    parent: Selection<any, any, any, any>
+  ): void {
+    const width = element.getWidth(false);
+    let height = element.getHeight();
+    const polygonPoints = this.polygonService.getPolygonPoints(width, height);
+
+    const color = 'transparent';
+
+    let laElement = getLowestSelectionActionableElement(element);
+
+    let actionable =
+      laElement.parent !== null &&
+      laElement.infixSelectableState !== SelectableState.None;
+
+    let polygon = this.createPolygon(
+      parent,
+      polygonPoints,
+      color,
+      actionable,
+      false
+    );
+
+    if (this.traceInfixSelectionMode) {
+      this.addInfixSelectionAttributes(element, polygon, true);
+    }
+
+    const textcolor = 'white';
+
+    const activityText = parent
+      .append('text')
+      .attr('x', width / 2)
+      .attr('y', height / 2)
+      .classed('user-select-none', true)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('font-size', VARIANT_Constants.FONT_SIZE)
+      .attr('font-weight', 'bold')
+      .attr('fill', textcolor)
+      .classed('activity-text', true);
+
+    let y = height / 2;
+
+    let dy = 0;
+
+    const tspan = activityText
+      .append('tspan')
+      .attr('x', width / 2)
+      .attr('y', y + dy)
+      .text('END');
+
+    if (this.onClickCbFc) {
+      parent.on('click', (e: PointerEvent) => {
+        this.onVariantClick(element);
+        // hide the tooltip
+        if (this.variantService.activityTooltipReference) {
+          this.variantService.activityTooltipReference.tooltip('hide');
+        }
+        e.stopPropagation();
+      });
+    }
+
+    if (this.onMouseOverCbFc) {
+      this.onMouseOverCbFc(this, element, this.variant, parent);
+    }
+  }
+
   onVariantClick(element: VariantElement) {
     this.onClickCbFc(this, element, this.variant);
     this.redrawArcsIfComputed.emit();
@@ -1010,10 +2232,20 @@ export class VariantDrawerDirective
       });
     }
 
-    if (this.onRightMouseClickCbFc) {
+    if (this.onRightMouseClickCbFc || this.contextMenuComponent) {
       parent.on('contextmenu', (e: PointerEvent) => {
-        this.onRightMouseClickCbFc(this, element, this.variant, e);
+        e.preventDefault();
         e.stopPropagation();
+        if (this.onRightMouseClickCbFc) {
+          this.onRightMouseClickCbFc(this, element, this.variant, e);
+        }
+        if (this.contextMenuComponent?.contextMenu) {
+          this.contextMenuService.show(this.contextMenuComponent.contextMenu, {
+            value: element,
+            x: (e as any).x || (e as any).clientX,
+            y: (e as any).y || (e as any).clientY,
+          });
+        }
       });
     }
 
@@ -1069,7 +2301,6 @@ export class VariantDrawerDirective
     maxWidth: number
   ): boolean {
     let textLength = this.getComputedTextLength(textSelection);
-    //let textLength = textSelection.node().getBoundingClientRect().width;
 
     let truncated = false;
     while (textLength > maxWidth && text.length > 1) {
@@ -1079,7 +2310,6 @@ export class VariantDrawerDirective
       }
       textSelection.text(text + '..');
       textLength = this.getComputedTextLength(textSelection);
-      //textLength = textSelection.node().getBoundingClientRect().width;
       truncated = true;
     }
 
@@ -1101,7 +2331,13 @@ export class VariantDrawerDirective
         textSelection.text()
       );
     } else {
-      textLength = textSelection.node().getBoundingClientRect().width;
+      const node = textSelection.node();
+      // Use SVG's native getComputedTextLength() for accurate measurement
+      if (typeof node.getComputedTextLength === 'function') {
+        textLength = node.getComputedTextLength();
+      } else {
+        textLength = node.getBoundingClientRect().width;
+      }
       if (textLength == 0) {
         textLength =
           textSelection.text().length * VARIANT_Constants.CHAR_LENGTH;

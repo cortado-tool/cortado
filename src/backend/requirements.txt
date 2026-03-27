@@ -7,6 +7,6 @@ python-multipart
 pm4py==2.4.1
 appdirs
 websockets
-git+https://github.com/cortado-tool/cortado-core@main#egg=cortado_core
+cortado_core @git+https://github.com/juliusbrehme/cortado-core.git@main
 cvxopt
 pyinstaller~=6.6.0

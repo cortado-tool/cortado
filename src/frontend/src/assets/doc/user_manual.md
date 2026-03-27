@@ -141,15 +141,15 @@ After applying clustering, variants are grouped in their respective clusters as 
 
 ## Variant Querying
 
-The variant querying window can be accessed by clicking <i class="bi bi-funnel btn-icon"></i>`Variant Query` from the Variant Explorers bottom right corner. 
-Here the user can enter and execute a query to search for variant with specific requirements.
+With variant querying, the user can enter and execute a query to search for variant with specific requirements.
 Only variants which fulfill the query are then shown in the Variant Explorer.
 Additionally, these variants can then be deleted from the pool of variants.
 Another option is to delete everything except those variants returned by the query.
 
-Variant queries support autocompletion. Either click on of the suggestions with your cursor or select one by using the arrow keys on your keyboard and then complete it by pressing `<Tab>` your keyboard.
+### Textual Variant Query Language
 
-### Variant Query Language
+The textual variant querying window can be accessed by clicking <i class="bi bi-funnel btn-icon"></i>`Variant Query` from the Variant Explorers bottom right corner. 
+Variant queries support autocompletion. Either click on of the suggestions with your cursor or select one by using the arrow keys on your keyboard and then complete it by pressing `<Tab>` your keyboard.
 
 A valid **Query** is made up of **Activities** and **Operators**, which together form
 expressions that can be linked by logical operators to form more complex queries.
@@ -271,6 +271,40 @@ is a start activity.
 | `[Exp1] AND [Exp2]`| Returns true if and only if *Exp1* and *Exp2* both are true            |
 | `[Exp1] OR [Exp2]` | Returns true if either *Exp1* or *Exp2* is true or if both of them are |
 | `NOT ( [Exp] )`    | Returns true if *Exp* is False                                         |
+
+### Visual Variant Query Language
+
+The <em>visual query modeler</em> allows users to manually model a variant query with several operators. It could be opened by: the head toolbar -> `Editors` -> <i class="bi bi-search btn-icon"></i>`Open Visual Query Modeler`.
+
+<img class="medium" src="./assets/doc/screenshots/visual_query/visual_query_modeler.png">
+
+How to model a query:
+
+1. Select the <em>insertion strategy</em> (where to insert the activity) in the toolbar
+2. Start to create a logic tree in the logic tree editor. Once you create the first query node proceed.
+3. Click the colorful activity buttons with label to insert corresponding activity into the query
+4. Select a chevron in the query (could be both a single activity or group), and apply an operator (either through context menu or header bar)
+5. Click on the <i class="bi bi-funnel btn-icon"></i>`Filter` and test your query by selecting <i class="bi bi-file-earmark-text me-2"></i>`Filter Current Query`
+6. Repeat the process until the logic tree is complete.
+7. Click on the <i class="bi bi-funnel btn-icon"></i>`Filter` and execute your query by selecting <i class="bi bi-diagram-3 me-2"></i>`Filter Logic Tree`
+
+<img class="medium" src="./assets/doc/screenshots/visual_query/model_a_visual_query.gif">
+
+A valid **Query** is made up of **Activities** and **Operators**. Queries can be linked by logical operators to form more complex queries.
+For Operators we can distinguish between *Control-Flow Operators* and *Special Placeholders*. The latter do not allow any nesting.
+We provide the following Operators:
+
+1. Parallel Operator: Model parallel patterns
+3. Choice Operator: Model an XOR-Relation over a set of Activities.
+4. Optional Operator: Model optional patterns
+5. Loop Operator: Model repeating patterns and specify the range
+6. Fallthrough Operator: Model patterns of activities without order
+7. Wildcard Operator: Special Placeholder representing all possible Acitivities
+8. Anything Operator: Special Placeholder representing all possible modeled patterns
+9. Start Operator: Special Placeholder, offering the possibility to search for variants starting on query
+10. End Operator: Special Placeholder, offering the possibility to search for variants ending on query
+
+<img class="medium" src="./assets/doc/screenshots/visual_query/operators.png">
 
 ## Variant Fragments
 

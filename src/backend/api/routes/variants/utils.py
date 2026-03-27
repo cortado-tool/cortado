@@ -31,7 +31,7 @@ def count_fragment_occurrences(variant, fragment: Group, infixType: InfixType, i
 
 
 def get_trace_counts(
-    variants: Mapping[int, Tuple[ConcurrencyGroup, Trace, List, VariantInformation]]
+    variants: Mapping[int, Tuple[ConcurrencyGroup, Trace, List, VariantInformation]],
 ):
     return list(map(lambda variant: len(variant[1][1]), variants.items()))
 

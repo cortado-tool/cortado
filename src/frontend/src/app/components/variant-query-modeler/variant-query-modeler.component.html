@@ -1,0 +1,529 @@
+<div class="variant-modeler">
+  <div class="bg-dark btn-tool-bar">
+    <!-- Filter Dropdown -->
+    <div class="btn-group" ngbDropdown container="body">
+      <button
+        class="button"
+        ngbDropdownToggle
+        [disabled]="emptyVariant && currentEditingQueryId === null"
+        ngbTooltip="Filter variants"
+        triggers="hover"
+        container="body"
+      >
+        <i class="bi bi-filter"></i>
+        <div @collapseText class="button-text px-1" *ngIf="!collapse">
+          Filter
+        </div>
+      </button>
+      <div class="dropdown-menu" ngbDropdownMenu>
+        <button 
+          ngbDropdownItem
+          class="dropdown-item"
+          (click)="onFilterCurrentQuery()"
+          [disabled]="emptyVariant || currentEditingQueryId === null">
+          <i class="bi bi-file-earmark-text me-2"></i>
+          Filter Current Query
+        </button>
+        <button 
+          ngbDropdownItem
+          class="dropdown-item"
+          (click)="onFilterLogicTree()"
+          [disabled]="!isFilterable()">
+          <i class="bi bi-diagram-3 me-2"></i>
+          Filter Logic Tree
+        </button>
+      </div>
+    </div>
+
+    <div class="vr mx-2"></div>
+
+    <!-- Query Type Selector -->
+    <div class="btn-group" ngbDropdown container="body">
+      <button
+        class="button"
+        ngbDropdownToggle
+        [disabled]="currentEditingQueryId === null"
+        ngbTooltip="Select Algorithm"
+        triggers="hover"
+        container="body"
+      >
+        <i class="bi bi-gear"></i>
+        <div @collapseText class="button-text px-1" *ngIf="!collapse">
+          {{ queryType }}
+        </div>
+      </button>
+      <div class="dropdown-menu" ngbDropdownMenu>
+        <button
+          ngbDropdownItem
+          class="dropdown-item"
+          (click)="queryType = 'DFS'"
+          [ngClass]="queryType === 'DFS' ? 'strategy-selected' : ''"
+          [disabled]="currentEditingQueryId === null"
+          ngbTooltip="DFS Algorithm"
+          triggers="hover"
+          container="body"
+        >
+          DFS
+        </button>
+
+        <button
+          ngbDropdownItem
+          class="dropdown-item"
+          (click)="queryType = 'BFS'"
+          [ngClass]="queryType === 'BFS' ? 'strategy-selected' : ''"
+          [disabled]="currentEditingQueryId === null"
+          ngbTooltip="BFS Algorithm"
+          triggers="hover"
+          container="body"
+        >
+          BFS
+        </button>
+        <button
+          ngbDropdownItem
+          class="dropdown-item"
+          (click)="queryType = 'VM'"
+          [ngClass]="queryType === 'VM' ? 'strategy-selected' : ''"
+          [disabled]="currentEditingQueryId === null"
+          ngbTooltip="VM Algorithm"
+          triggers="hover"
+          container="body"
+        >
+          VM
+        </button>
+        <button
+          ngbDropdownItem
+          class="dropdown-item"
+          (click)="queryType = 'VM_LAZY'"
+          [ngClass]="queryType === 'VM_LAZY' ? 'strategy-selected' : ''"
+          [disabled]="currentEditingQueryId === null"
+          ngbTooltip="VM_LAZY Algorithm"
+          triggers="hover"
+          container="body"
+        >
+          VM_LAZY
+        </button>
+      </div>
+    </div>
+
+    <div class="vr mx-2"></div>
+
+    <div class="btn-group">
+      <!-- Toggle Preview -->
+      <button
+        class="button"
+        (click)="togglePreview()"
+        [disabled]="currentEditingQueryId === null"
+        ngbTooltip="Toggle Preview Mode"
+        triggers="hover"
+        container="body"
+      >
+        <i class="bi bi-eye" [ngClass]="{
+          'text-warning': previewMode
+        }"></i>
+        <div @collapseText class="button-text px-1" [ngClass]="{
+          'text-warning': previewMode
+        }" *ngIf="!collapse">
+          Preview
+        </div>
+      </button>
+    </div>
+
+    <div class="vr mx-2"></div>
+
+    <div class="btn-group round-corners" role="group">
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.infront"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.infront
+            ? 'strategy-selected'
+            : ''
+        "
+        [disabled]="currentEditingQueryId === null"
+        ngbTooltip="insert new activities infront the selected activtiy"
+        triggers="hover"
+        container="body"
+      >
+        <i class="bi bi-arrow-bar-left"></i>
+      </button>
+
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.behind"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.behind
+            ? 'strategy-selected'
+            : ''
+        "
+        [disabled]="currentEditingQueryId === null"
+        ngbTooltip="insert new activities behind of the selected activtiy"
+        triggers="hover"
+        container="body"
+      >
+        <i class="bi bi-arrow-bar-right"></i>
+      </button>
+
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.parallel"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.parallel
+            ? 'strategy-selected'
+            : ''
+        "
+        [disabled]="currentEditingQueryId === null"
+        ngbTooltip="insert new activities parallel of the selected activtiy"
+        triggers="hover"
+        container="body"
+      >
+        <i class="bi bi-arrows-expand"></i>
+      </button>
+
+      <button
+        type="button"
+        class="button"
+        (click)="selectedStrategy = insertionStrategy.replace"
+        [ngClass]="
+          selectedStrategy === insertionStrategy.replace
+            ? 'strategy-selected'
+            : ''
+        "
+        [disabled]="currentEditingQueryId === null"
+        ngbTooltip="replace the currently selected activity"
+        triggers="hover"
+        container="body"
+      >
+        <i class="bi bi-arrow-repeat"></i>
+      </button>
+    </div>
+
+    <div class="vr mx-2"></div>
+
+    <button
+      class="button btn-fixed-width"
+      (click)="undo()"
+      [disabled]="currentEditingQueryId === null || !(cachedVariants.length - 1 > 0 && cacheIdx !== 0)"
+      ngbTooltip="undo"
+      triggers="hover"
+      container="body"
+    >
+      <i class="bi bi-arrow-counterclockwise btn-icon"></i>
+      <span
+        class="text-secondary"
+        *ngIf="cachedVariants.length - 1 > 0 && cacheIdx !== 0"
+      >
+        ({{ cacheIdx }})
+      </span>
+    </button>
+
+    <button
+      class="button btn-fixed-width"
+      (click)="redo()"
+      [disabled]="currentEditingQueryId === null || !(cacheIdx < cachedVariants.length - 1)"
+      ngbTooltip="redo"
+      triggers="hover"
+      container="body"
+    >
+      <i class="bi bi-arrow-clockwise btn-icon"></i>
+      <span class="text-secondary" *ngIf="cacheIdx < cachedVariants.length - 1">
+        ({{ cachedVariants.length - 1 - cacheIdx }})
+      </span>
+    </button>
+
+    <div class="vr mx-2"></div>
+
+    <button
+        class="button"
+        (click)="onAddStartOperatorSelected()"
+        ngbTooltip="Add Start Node"
+        triggers="hover"
+        container="body"
+        [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-play"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    <button
+      class="button"
+      (click)="onAddEndOperatorSelected()"
+      ngbTooltip="Add End Node"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-stop"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    <button
+      class="button"
+      (click)="onAddAnythingOperatorSelected()"
+      ngbTooltip="Add Anything Operator"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-three-dots"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    <button
+      class="button"
+      (click)="onAddWildcardSelected()"
+      ngbTooltip="Add Wildcard Operator"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-star-fill"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    <button
+      class="button"
+      (click)="onRepeatableSelected()"
+      ngbTooltip="Add Repeatable Operator"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-repeat"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    <button
+      class="button"
+      (click)="onOptionalSelected()"
+      ngbTooltip="Add Optional Operator"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-question-circle"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    <button
+      class="button"
+      (click)="onChoiceSelected()"
+      ngbTooltip="Add Choice Operator"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-list"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    <button
+      class="button"
+      (click)="onFallthroughSelected()"
+      ngbTooltip="Add Fallthrough Operator"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-arrow-left-right"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      >
+      </i>
+    </button>
+    
+    <div class="vr mx-2"></div>
+
+    <button
+      class="button"
+      (click)="removeSelection()"
+      [disabled]="currentEditingQueryId === null || !selectedElement"
+      ngbTooltip="remove current selection"
+      triggers="hover"
+      container="body"
+    >
+      <i class="bi bi-dash-square-dotted"></i>
+    </button>
+
+    <span class="vl mx-2"></span>
+
+    <button
+      class="button"
+      (click)="onDeleteSelected()"
+      ngbTooltip="remove the currently selected activity"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant || !selectedElement"
+    >
+      <i
+        class="bi bi-trash"
+        [ngClass]="{
+          'text-warning': !emptyVariant
+        }"
+      ></i>
+
+      <div @collapseText class="button-text px-1" *ngIf="!collapse">
+        remove selected chevron(s)
+      </div>
+    </button>
+
+    <div class="vr mx-2"></div>
+
+    <button
+      class="button"
+      (click)="onDeleteVariant()"
+      ngbTooltip="remove the current variant"
+      triggers="hover"
+      container="body"
+      [disabled]="currentEditingQueryId === null || emptyVariant"
+    >
+      <i
+        class="bi bi-x-octagon"
+        [ngClass]="{
+          'text-danger': !emptyVariant
+        }"
+      ></i>
+      <div @collapseText class="button-text px-1" *ngIf="!collapse">
+        remove current variant
+      </div>
+    </button>
+
+    <div class="vr mx-2"></div>
+
+    <button
+      class="button"
+      (click)="resetAll()"
+      ngbTooltip="reset both editors"
+      triggers="hover"
+      container="body"
+    >
+      <i class="bi bi-arrow-counterclockwise text-warning"></i>
+      <div @collapseText class="button-text px-1" *ngIf="!collapse">
+        Reset All
+      </div>
+    </button>
+
+    <button
+      class="button ms-auto"
+      ngbTooltip="focus selected"
+      triggers="hover"
+      container="body"
+      (click)="focusSelected()"
+      [disabled]="currentEditingQueryId === null || emptyVariant || multipleSelected"
+    >
+      <i class="bi bi-eye-fill"></i>
+    </button>
+
+    <button
+      class="button ms-auto"
+      ngbTooltip="move to the start of the variant"
+      triggers="hover"
+      container="body"
+      (click)="centerVariant()"
+      [disabled]="currentEditingQueryId === null"
+    >
+      <i class="bi bi-arrows-fullscreen btn-icon text-light"></i>
+    </button>
+    
+  </div>
+  <app-activity-button-area
+    [activityNames]="activityNames"
+    (activityButtonClick)="handleActivityButtonClick($event)"
+    [ngClass]="
+      currentEditingQueryId === null ||
+      (selectedElement &&
+        !multipleSelected &&
+        (selectedStrategy === insertionStrategy.infront ||
+          selectedStrategy === insertionStrategy.behind) &&
+        checkOverlapInsert()) ||
+      (multipleSelected &&
+        !(
+          checkNeighborSelection() &&
+          selectedStrategy === insertionStrategy.parallel
+        )) ||
+      (!selectedElement && !emptyVariant)
+        ? 'button-area-disabled'
+        : ''
+    "
+  >
+  </app-activity-button-area>
+
+  <app-variant-query-modeler-context-menu
+    #contextMenuComponent
+    (menuAction)="onContextMenuAction($event)"
+  ></app-variant-query-modeler-context-menu>
+
+  <div class="editor-layout">
+    <!-- Tree visualization on the left (fixed, no zoom) -->
+    <div class="tree-container">
+      <div class="editor-badge">Logic Tree Editor</div>
+      <app-query-logic-tree 
+        [rootNode]="logicTree"
+        [currentEditingQueryId]="currentEditingQueryId"
+        [queryNodes]="queryNodes"
+        [showPreviews]="previewMode"
+        (nodeUpdated)="onTreeUpdated($event)"
+        (queryCreated)="onQueryCreated($event)"
+        (querySelected)="selectVariantForEditing($event.queryId, $event.node)">
+      </app-query-logic-tree>
+    </div>
+
+    <!-- Main editor on the right (with zoom) -->
+    <div class="editor-container">
+      <div class="editor-badge">Visual Query Editor</div>
+      <app-zoom-field
+        [zoomScale]="[0.1, 3]"
+        [computeFocusOffsets]="computeFocusOffset"
+      >
+        <svg
+          #content
+          #VariantMainGroup
+          appVariantDrawer
+          id="VariantMainGroup"
+          [variant]="{ variant: currentVariant }"
+          [contextMenuComponent]="contextMenuComponent"
+          (selection)="handleRedraw($event)"
+          [computeActivityColor]="computeActivityColor"
+          [keepStandardView]="true"
+          class="zoom-group-variant in-variant-modeler"
+          [style.display]="currentEditingQueryId !== null ? 'block' : 'none'">
+        </svg>
+      </app-zoom-field>
+      <div class="no-selection-message" *ngIf="currentEditingQueryId === null">
+        <p>Select a variant query from the tree to start editing</p>
+      </div>
+    </div>
+  </div>
+</div>

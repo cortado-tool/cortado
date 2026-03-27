@@ -41,6 +41,8 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { DropZoneDirective } from './directives/drop-zone/drop-zone.directive';
 import { TreeStringRendererComponent } from './components/tree-string-renderer/tree-string-renderer.component';
 import { VariantModelerComponent } from './components/variant-modeler/variant-modeler.component';
+import { VariantQueryModelerComponent } from './components/variant-query-modeler/variant-query-modeler.component';
+import { VariantQueryModelerContextMenuComponent } from './components/variant-query-modeler/variant-query-modeler-context-menu/variant-query-modeler-context-menu.component';
 import { VariantComponent } from './components/variant-explorer/variant/variant.component';
 import { VariantConformanceDialogComponent } from './components/variant-explorer/conformance-info/variant-conformance-dialog/variant-conformance-dialog.component';
 import { BpmnEditorComponent } from './components/bpmn-editor/bpmn-editor.component';
@@ -107,6 +109,7 @@ import { ArcDiagramFilterComponent } from './components/variant-explorer/arc-dia
 import { VariantVisualisationComponent } from './components/variant-explorer/variant/subcomponents/variant-visualisation/variant-visualisation.component';
 import { LogExporterDialogComponent } from './components/log-exporter-dialog/log-exporter-dialog/log-exporter-dialog.component';
 import { EnumToArrayPipe } from './pipes/enum-to-array.pipe';
+import { QueryLogicTreeComponent } from './components/query-logic-tree/query-logic-tree.component';
 
 @NgModule({
   declarations: [
@@ -159,6 +162,9 @@ import { EnumToArrayPipe } from './pipes/enum-to-array.pipe';
     ToasterComponent,
     PerformanceProgressBarComponent,
     VariantExplorerContextMenuComponent,
+    VariantQueryModelerComponent,
+    VariantQueryModelerContextMenuComponent,
+    QueryLogicTreeComponent,
     ProcessTreeDrawerDirective,
     BpmnDrawerDirective,
     TreePerformanceButtonComponent,

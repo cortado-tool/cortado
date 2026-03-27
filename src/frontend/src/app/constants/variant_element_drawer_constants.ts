@@ -9,6 +9,7 @@ export class VARIANT_Constants {
   public static ARROW_HEAD_LENGTH = 12;
   public static ARROW_HEAD_ANGLE = 20;
   public static FONT_SIZE = 15;
+  public static FONT_SIZE_OPERATOR = 12;
   public static WAITING_WIDTH = 5;
   public static CHAR_WIDTH = 12;
   public static MAX_OFFSETWIDTH = 800;

@@ -45,6 +45,13 @@ export class ZoomFieldComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.initalCenterContent();
     this.addZoomFunctionality();
+
+    this.content.nativeElement.addEventListener('click', (event) => {
+      console.log('click event in zoom field');
+      if (this.clkCallback) {
+        this.clkCallback(event);
+      }
+    });
   }
 
   private initalCenterContent() {

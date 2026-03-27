@@ -1,5 +1,4 @@
-"""Import routes here
-"""
+"""Import routes here"""
 
 from fastapi import APIRouter
 

@@ -5,6 +5,7 @@ import {
   setParent,
   updateSelectionAttributesForGroup,
 } from './infix_selection';
+import { Choice } from 'src/app/components/variant-miner/variant-miner.component';
 
 export class PerformanceStats {
   public min: number;
@@ -62,12 +63,15 @@ export abstract class VariantElement {
       (this instanceof ParallelGroup &&
         variantElement instanceof ParallelGroup) ||
       (this instanceof LoopGroup && variantElement instanceof LoopGroup) ||
+      (this instanceof RepeatGroup && variantElement instanceof RepeatGroup) ||
+      (this instanceof OptionalGroup &&
+        variantElement instanceof OptionalGroup) ||
       (this instanceof SkipGroup && variantElement instanceof SkipGroup) ||
       (this instanceof LeafNode && variantElement instanceof LeafNode) ||
       (this instanceof WaitingTimeNode &&
         variantElement instanceof WaitingTimeNode) ||
-      (this instanceof StartGroup && variantElement instanceof StartGroup) ||
-      (this instanceof EndGroup && variantElement instanceof EndGroup)
+      (this instanceof StartNode && variantElement instanceof StartNode) ||
+      (this instanceof EndNode && variantElement instanceof EndNode)
     ) {
       equals = ((a, b) =>
         a.size === b.size && [...a].every((value) => b.has(value)))(
@@ -96,6 +100,16 @@ export abstract class VariantElement {
     return self as ParallelGroup;
   }
 
+  public asRepeatGroup(): RepeatGroup {
+    const self: unknown = this;
+    return self as RepeatGroup;
+  }
+
+  public asOptionalGroup(): OptionalGroup {
+    const self: unknown = this;
+    return self as OptionalGroup;
+  }
+
   public asChoiceGroup(): ChoiceGroup {
     let self: unknown = this;
     return <ChoiceGroup>self;
@@ -109,6 +123,26 @@ export abstract class VariantElement {
   public asLeafNode(): LeafNode {
     const self: unknown = this;
     return self as LeafNode;
+  }
+
+  public asEndNode(): EndNode {
+    const self: unknown = this;
+    return self as EndNode;
+  }
+
+  public asStartNode(): StartNode {
+    const self: unknown = this;
+    return self as StartNode;
+  }
+
+  public asWildcardNode(): WildcardNode {
+    const self: unknown = this;
+    return self as WildcardNode;
+  }
+
+  public asAnythingNode(): AnythingNode {
+    const self: unknown = this;
+    return self as AnythingNode;
   }
 
   public asLoopGroup(): LoopGroup {
@@ -479,6 +513,422 @@ export class SequenceGroup extends VariantElement {
   }
 }
 
+export class RepeatGroup extends VariantElement {
+  public repeatCountMin: number = 1;
+  public repeatCountMax: number = 200;
+
+  public setRepeatCountMin(count: number) {
+    this.repeatCountMin = count;
+  }
+
+  public getRepeatCountMin(): number {
+    return this.repeatCountMin;
+  }
+
+  public setRepeatCountMax(count: number) {
+    this.repeatCountMax = count;
+  }
+
+  public getRepeatCountMax(): number {
+    return this.repeatCountMax;
+  }
+
+  public getActivities(): Set<string> {
+    const res: Set<string> = new Set<string>();
+
+    this.elements.forEach((e) => e.getActivities().forEach((a) => res.add(a)));
+
+    return res;
+  }
+
+  public renameActivity(activityName: string, newActivityName: string) {
+    this.elements.forEach((e) => {
+      e.renameActivity(activityName, newActivityName);
+    });
+  }
+
+  public deleteActivity(activityName: string): [VariantElement[], boolean] {
+    let newElems = [];
+
+    for (const elem of this.elements) {
+      if (!(elem instanceof WaitingTimeNode)) {
+        const [variantElements, isFallthrough] =
+          elem.deleteActivity(activityName);
+
+        if (isFallthrough) {
+          // Found a Fallthrough Stop Early
+          return [[], true];
+        } else {
+          // We append the result
+          if (variantElements) {
+            newElems = newElems.concat(variantElements);
+            variantElements.forEach((e) => (e.parent = this));
+          }
+        }
+      }
+    }
+
+    if (newElems.length > 1) {
+      this.elements = newElems;
+      return [[this], false];
+    } else if (newElems.length === 1) {
+      if (newElems[0] instanceof SequenceGroup) {
+        return [newElems[0].elements, false];
+      } else {
+        return [newElems, false];
+      }
+    } else {
+      return [null, false];
+    }
+  }
+
+  constructor(
+    public elements: VariantElement[],
+    performance: any = undefined,
+    public id: number = undefined
+  ) {
+    super(performance);
+  }
+
+  public asString(): string {
+    return (
+      'Re(' +
+      this.elements
+        .filter((v) => {
+          return !(v instanceof WaitingTimeNode);
+        })
+        .map((v) => {
+          return v.asString();
+        })
+        .join(', ') +
+      ')'
+    );
+  }
+
+  public setExpanded(expanded: boolean) {
+    super.setExpanded(expanded);
+
+    for (const el of this.elements) {
+      el.setExpanded(expanded);
+    }
+  }
+
+  public setElements(elements: VariantElement[]) {
+    this.elements = elements;
+  }
+
+  public getElements() {
+    return this.elements;
+  }
+
+  public getHeight(): number {
+    if (this.height) {
+      return this.height;
+    }
+    return this.recalculateHeight();
+  }
+
+  public getWidth(includeWaiting = false): number {
+    if (this.width) {
+      return this.width;
+    }
+    return this.recalculateWidth(includeWaiting);
+  }
+
+  public copy(): RepeatGroup {
+    const res = new RepeatGroup(this.elements.map((e) => e.copy()));
+    res.parent = this.parent;
+    res.expanded = this.expanded;
+    res.repeatCountMin = this.repeatCountMin;
+    res.repeatCountMax = this.repeatCountMax;
+    return res;
+  }
+
+  public updateWidth(includeWaiting) {
+    if (this.parent instanceof ParallelGroup) {
+      for (const el of this.elements) {
+        if (el instanceof ChoiceGroup) {
+          el.width =
+            this.width - VARIANT_Constants.MARGIN_X - 2 * this.getHeadLength();
+        } else {
+          el.width =
+            this.width -
+            2 * VARIANT_Constants.MARGIN_X -
+            2 * this.getHeadLength();
+        }
+      }
+    }
+
+    for (const el of this.elements) {
+      el.updateWidth(includeWaiting);
+    }
+  }
+
+  public recalculateHeight(): number {
+    this.elements.forEach((el) => (el.height = undefined));
+    this.height = Math.max(
+      ...this.elements.map((el: VariantElement) => el.getHeight())
+    );
+    if (!(this.parent instanceof SkipGroup))
+      this.height += this.getMarginY() * 2;
+
+    this.height +=
+      2 * VARIANT_Constants.MARGIN_Y + 2 * VARIANT_Constants.FONT_SIZE_OPERATOR;
+
+    return this.height;
+  }
+
+  public recalculateWidth(includeWaiting = false): number {
+    this.elements.forEach((el) => (el.width = undefined));
+    this.width = this.elements
+      .filter((el) => !(el instanceof WaitingTimeNode) || includeWaiting)
+      .map((el: VariantElement) => el.getWidth(includeWaiting))
+      .reduce((a: number, b: number) => a + b);
+    if (!(this.parent instanceof SkipGroup))
+      this.width +=
+        2 * this.getMarginX() +
+        this.getHeadLength() -
+        this.elements[0].getHeadLength();
+
+    this.width += 2 * VARIANT_Constants.MARGIN_X;
+
+    return this.width;
+  }
+
+  // Optional Group will be on top of Repeatable Group if both are selected
+  public serialize(l = 1) {
+    let parent = null;
+    let filterElements = this.elements;
+    if (this.elements.length > 1) {
+      let parentSequence = new SequenceGroup(this.elements);
+      filterElements = [parentSequence];
+    }
+    const elements = filterElements
+      .map((e) => e.serialize(l))
+      .flat()
+      .filter((e) => e !== null);
+    parent = {
+      loop: elements,
+      repeat_count_min: this.repeatCountMin,
+      repeat_count_max: this.repeatCountMax,
+    };
+    return parent;
+  }
+
+  public updateSelectionAttributes(): void {
+    updateSelectionAttributesForGroup(this);
+  }
+
+  public updateSurroundingSelectableElements(): void {
+    const children = this.elements.filter((c) => isElementWithActivity(c));
+    children.forEach((c) => {
+      if (!c.selected) {
+        c.setInfixSelectableState(SelectableState.Selectable, false);
+      } else {
+        c.setInfixSelectableState(SelectableState.Unselectable, false);
+      }
+    });
+  }
+
+  public updateConformance(confValue: number): void {
+    this.elements.forEach((el) => el.updateConformance(confValue));
+  }
+}
+
+export class OptionalGroup extends VariantElement {
+  public getActivities(): Set<string> {
+    const res: Set<string> = new Set<string>();
+
+    this.elements.forEach((e) => e.getActivities().forEach((a) => res.add(a)));
+
+    return res;
+  }
+
+  public renameActivity(activityName: string, newActivityName: string) {
+    this.elements.forEach((e) => {
+      e.renameActivity(activityName, newActivityName);
+    });
+  }
+
+  public deleteActivity(activityName: string): [VariantElement[], boolean] {
+    let newElems = [];
+
+    for (const elem of this.elements) {
+      if (!(elem instanceof WaitingTimeNode)) {
+        const [variantElements, isFallthrough] =
+          elem.deleteActivity(activityName);
+
+        if (isFallthrough) {
+          // Found a Fallthrough Stop Early
+          return [[], true];
+        } else {
+          // We append the result
+          if (variantElements) {
+            newElems = newElems.concat(variantElements);
+            variantElements.forEach((e) => (e.parent = this));
+          }
+        }
+      }
+    }
+
+    if (newElems.length > 1) {
+      this.elements = newElems;
+      return [[this], false];
+    } else if (newElems.length === 1) {
+      if (newElems[0] instanceof SequenceGroup) {
+        return [newElems[0].elements, false];
+      } else {
+        return [newElems, false];
+      }
+    } else {
+      return [null, false];
+    }
+  }
+
+  constructor(
+    public elements: VariantElement[],
+    performance: any = undefined,
+    public id: number = undefined
+  ) {
+    super(performance);
+  }
+
+  public asString(): string {
+    return (
+      'Opt(' +
+      this.elements
+        .filter((v) => {
+          return !(v instanceof WaitingTimeNode);
+        })
+        .map((v) => {
+          return v.asString();
+        })
+        .join(', ') +
+      ')'
+    );
+  }
+
+  public setExpanded(expanded: boolean) {
+    super.setExpanded(expanded);
+
+    for (const el of this.elements) {
+      el.setExpanded(expanded);
+    }
+  }
+
+  public setElements(elements: VariantElement[]) {
+    this.elements = elements;
+  }
+
+  public getElements() {
+    return this.elements;
+  }
+
+  public getHeight(): number {
+    if (this.height) {
+      return this.height;
+    }
+    return this.recalculateHeight();
+  }
+
+  public getWidth(includeWaiting = false): number {
+    if (this.width) {
+      return this.width;
+    }
+    return this.recalculateWidth(includeWaiting);
+  }
+
+  public copy(): OptionalGroup {
+    const res = new OptionalGroup(this.elements.map((e) => e.copy()));
+    res.parent = this.parent;
+    res.expanded = this.expanded;
+    return res;
+  }
+
+  public updateWidth(includeWaiting) {
+    if (this.parent instanceof ParallelGroup) {
+      for (const el of this.elements) {
+        if (el instanceof ChoiceGroup) {
+          el.width =
+            this.width - VARIANT_Constants.MARGIN_X - 2 * this.getHeadLength();
+        } else {
+          el.width =
+            this.width -
+            2 * VARIANT_Constants.MARGIN_X -
+            2 * this.getHeadLength();
+        }
+      }
+    }
+
+    for (const el of this.elements) {
+      el.updateWidth(includeWaiting);
+    }
+  }
+
+  public recalculateHeight(): number {
+    this.elements.forEach((el) => (el.height = undefined));
+    this.height = Math.max(
+      ...this.elements.map((el: VariantElement) => el.getHeight())
+    );
+    if (!(this.parent instanceof SkipGroup))
+      this.height += this.getMarginY() * 2;
+
+    this.height +=
+      2 * VARIANT_Constants.MARGIN_Y + 2 * VARIANT_Constants.FONT_SIZE_OPERATOR;
+    return this.height;
+  }
+
+  public recalculateWidth(includeWaiting = false): number {
+    this.elements.forEach((el) => (el.width = undefined));
+    this.width = this.elements
+      .filter((el) => !(el instanceof WaitingTimeNode) || includeWaiting)
+      .map((el: VariantElement) => el.getWidth(includeWaiting))
+      .reduce((a: number, b: number) => a + b);
+    if (!(this.parent instanceof SkipGroup))
+      this.width +=
+        2 * this.getMarginX() +
+        this.getHeadLength() -
+        this.elements[0].getHeadLength();
+    this.width += 2 * VARIANT_Constants.MARGIN_X;
+    return this.width;
+  }
+
+  // Optional Group will be on top of Repeatable Group if both are selected
+  public serialize(l = 1) {
+    let parent = null;
+    let filterElements = this.elements;
+    if (this.elements.length > 1) {
+      let parentSequence = new SequenceGroup(this.elements);
+      filterElements = [parentSequence];
+    }
+    const elements = filterElements
+      .map((e) => e.serialize(l))
+      .flat()
+      .filter((e) => e !== null);
+    parent = { optional: elements };
+    return parent;
+  }
+
+  public updateSelectionAttributes(): void {
+    updateSelectionAttributesForGroup(this);
+  }
+
+  public updateSurroundingSelectableElements(): void {
+    const children = this.elements.filter((c) => isElementWithActivity(c));
+    children.forEach((c) => {
+      if (!c.selected) {
+        c.setInfixSelectableState(SelectableState.Selectable, false);
+      } else {
+        c.setInfixSelectableState(SelectableState.Unselectable, false);
+      }
+    });
+  }
+
+  public updateConformance(confValue: number): void {
+    this.elements.forEach((el) => el.updateConformance(confValue));
+  }
+}
+
 export class ParallelGroup extends VariantElement {
   public getActivities(): Set<string> {
     const res: Set<string> = new Set<string>();
@@ -820,6 +1270,20 @@ export class FallthroughGroup extends VariantElement {
 }
 
 export class ChoiceGroup extends VariantElement {
+  public isCollapsed: boolean = false;
+
+  public getCollapsed(): boolean {
+    return this.isCollapsed;
+  }
+
+  public setCollapsed(collapsed: boolean) {
+    this.isCollapsed = collapsed;
+  }
+
+  public toggleCollapsed() {
+    this.isCollapsed = !this.isCollapsed;
+  }
+
   public getActivities(): Set<string> {
     const res: Set<string> = new Set<string>();
 
@@ -920,11 +1384,16 @@ export class ChoiceGroup extends VariantElement {
 
   public copy(): ChoiceGroup {
     const res = new ChoiceGroup(this.elements.map((e) => e.copy()));
+    res.parent = this.parent;
     res.expanded = this.expanded;
     return res;
   }
 
   public updateWidth(includeWaiting) {
+    let numberOfElements = this.elements.length;
+    if (this.isCollapsed) {
+      numberOfElements = 1;
+    }
     let headLength = this.getHeadLength();
     for (let el of this.elements) {
       el.width =
@@ -933,7 +1402,7 @@ export class ChoiceGroup extends VariantElement {
         2 * headLength -
         (2 *
           ((VARIANT_Constants.LEAF_HEIGHT + VARIANT_Constants.MARGIN_Y) *
-            this.elements.length +
+            numberOfElements +
             VARIANT_Constants.MARGIN_Y)) /
           2.8;
     }
@@ -944,6 +1413,10 @@ export class ChoiceGroup extends VariantElement {
   }
 
   public recalculateHeight(): number {
+    if (this.isCollapsed) {
+      this.height = this.elements[0].getHeight() + 2 * this.getMarginY();
+      return this.height;
+    }
     this.elements.forEach((el) => (el.height = undefined));
     this.height =
       this.elements
@@ -953,6 +1426,11 @@ export class ChoiceGroup extends VariantElement {
   }
 
   public recalculateWidth(includeWaiting = false): number {
+    let numberOfElements = this.elements.length;
+    if (this.isCollapsed) {
+      // For the collapsed view, we have to readjust
+      numberOfElements = 1;
+    }
     this.elements.forEach((el) => (el.width = undefined));
     let headLength = this.getHeadLength();
     this.width =
@@ -965,7 +1443,7 @@ export class ChoiceGroup extends VariantElement {
       2 * headLength +
       (2 *
         ((VARIANT_Constants.LEAF_HEIGHT + VARIANT_Constants.MARGIN_Y) *
-          this.elements.length +
+          numberOfElements +
           VARIANT_Constants.MARGIN_Y)) /
         2.8;
     return this.width;
@@ -1300,7 +1778,6 @@ export class LeafNode extends VariantElement {
       this.width * 0.75 + this.getHeadLength() * 2,
       this.width - this.getHeadLength() * 2
     );
-
     return this.width;
   }
 
@@ -1453,49 +1930,7 @@ export class InvisibleSequenceGroup extends SequenceGroup {
   }
 }
 
-export class StartGroup extends VariantElement {
-  public updateSelectionAttributes(): void {}
-
-  public getActivities(): Set<string> {
-    return new Set<string>();
-  }
-
-  public asString(): string {
-    return 'END';
-  }
-
-  public deleteActivity(activityName: string): [VariantElement[], boolean] {
-    return [[this], false];
-  }
-
-  public renameActivity(activityName: string, newActivityName: string): void {}
-
-  public calculateSelectableElements(): void {}
-
-  public getHeight(): number {
-    return VARIANT_Constants.LEAF_HEIGHT;
-  }
-
-  public getWidth(includeWaiting: any): number {
-    return 25;
-  }
-
-  public recalculateWidth(includeWaiting: any): number {
-    return 25;
-  }
-
-  public recalculateHeight(includeWaiting: any): number {
-    return VARIANT_Constants.LEAF_HEIGHT;
-  }
-
-  public updateWidth(includeWaiting: any) {}
-
-  public serialize(l = 1): Object {
-    return { start: true };
-  }
-}
-
-export class EndGroup extends VariantElement {
+export class StartNode extends VariantElement {
   public updateSelectionAttributes(): void {}
 
   public getActivities(): Set<string> {
@@ -1519,11 +1954,93 @@ export class EndGroup extends VariantElement {
   }
 
   public getWidth(includeWaiting: any): number {
-    return 25;
+    if (this.width) {
+      return this.width;
+    }
+    this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+    this.width += VARIANT_Constants.MARGIN_X;
+
+    this.width = Math.max(
+      this.width * 0.75 + this.getHeadLength() * 2,
+      this.width - this.getHeadLength() * 2
+    );
+
+    return this.width;
   }
 
   public recalculateWidth(includeWaiting: any): number {
-    return 25;
+    if (this.expanded) {
+      this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+    } else {
+      this.width = VARIANT_Constants.LEAF_WIDTH;
+    }
+    //this.width += VARIANT_Constants.MARGIN_X;
+    return this.width;
+  }
+
+  public recalculateHeight(includeWaiting: any): number {
+    return VARIANT_Constants.LEAF_HEIGHT;
+  }
+
+  public updateWidth(includeWaiting: any) {}
+
+  public serialize(l = 1): Object {
+    return { start: true };
+  }
+
+  public copy(): StartNode {
+    const res = new StartNode();
+    res.expanded = this.expanded;
+    return res;
+  }
+}
+
+export class EndNode extends VariantElement {
+  public updateSelectionAttributes(): void {}
+
+  public getActivities(): Set<string> {
+    return new Set<string>();
+  }
+
+  public asString(): string {
+    return 'END';
+  }
+
+  public deleteActivity(activityName: string): [VariantElement[], boolean] {
+    return [[this], false];
+  }
+
+  public renameActivity(activityName: string, newActivityName: string): void {}
+
+  public calculateSelectableElements(): void {}
+
+  public getHeight(): number {
+    return VARIANT_Constants.LEAF_HEIGHT;
+  }
+
+  public getWidth(includeWaiting: any): number {
+    if (this.width) {
+      return this.width;
+    }
+    this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+    this.width += VARIANT_Constants.MARGIN_X;
+
+    this.width = Math.max(
+      this.width * 0.75 + this.getHeadLength() * 2,
+      this.width - this.getHeadLength() * 2
+    );
+
+    return this.width;
+  }
+
+  public recalculateWidth(includeWaiting: any): number {
+    if (this.expanded) {
+      this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+    } else {
+      this.width = VARIANT_Constants.LEAF_WIDTH;
+    }
+    //this.width += VARIANT_Constants.MARGIN_X;
+    return this.width;
   }
 
   public recalculateHeight(includeWaiting: any): number {
@@ -1534,6 +2051,235 @@ export class EndGroup extends VariantElement {
 
   public serialize(l = 1): Object {
     return { end: true };
+  }
+
+  public copy(): EndNode {
+    const res = new EndNode();
+    res.expanded = this.expanded;
+    return res;
+  }
+}
+
+export class AnythingNode extends VariantElement {
+  public activity: string[];
+
+  constructor(
+    performance: any = undefined,
+    public conformance: number[] = undefined,
+    public id: number = undefined
+  ) {
+    super(performance);
+    this.activity = ['...'];
+  }
+
+  public textLength = 10;
+
+  public getActivities(): Set<string> {
+    return new Set<string>(this.activity);
+  }
+
+  public renameActivity(activityName: string, newActivityName: string) {
+    this.activity = this.activity.map((a) => {
+      return a === activityName ? newActivityName : a;
+    });
+  }
+
+  public deleteActivity(activityName: string): [VariantElement[], boolean] {
+    if (this.activity.includes(activityName)) {
+      if (this.activity.length > 1) {
+        return [[this], true];
+      } else {
+        return [null, false];
+      }
+    }
+
+    return [[this], false];
+  }
+
+  public asString(): string {
+    return this.activity.join(';');
+  }
+
+  public getHeight(): number {
+    this.height =
+      this.activity.length *
+      (VARIANT_Constants.FONT_SIZE + 2 * VARIANT_Constants.MARGIN_Y);
+    return this.height;
+  }
+
+  public getWidth(
+    includeWaiting = false,
+    full_text_width: boolean = false
+  ): number {
+    if (this.width) {
+      return this.width;
+    }
+    if (this.expanded || includeWaiting) {
+      if (this.activity.length > 1) {
+        this.width =
+          VARIANT_Constants.LEAF_WIDTH_EXPANDED + 2 * this.getHeadLength();
+      } else {
+        this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+      }
+    } else if (full_text_width) {
+      this.width = this.activity[0].length * VARIANT_Constants.CHAR_WIDTH;
+    } else {
+      this.width = VARIANT_Constants.LEAF_WIDTH;
+    }
+    this.width += VARIANT_Constants.MARGIN_X;
+
+    this.width = Math.max(
+      this.width * 0.75 + this.getHeadLength() * 2,
+      this.width - this.getHeadLength() * 2
+    );
+
+    return this.width;
+  }
+
+  public updateWidth() {}
+
+  public recalculateHeight(): number {
+    this.height = VARIANT_Constants.LEAF_HEIGHT;
+    return this.height;
+  }
+
+  public copy(): AnythingNode {
+    const res = new AnythingNode([...this.activity]);
+    res.expanded = this.expanded;
+    return res;
+  }
+
+  public recalculateWidth(): number {
+    if (this.expanded) {
+      this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+    } else {
+      this.width = VARIANT_Constants.LEAF_WIDTH;
+    }
+    //this.width += VARIANT_Constants.MARGIN_X;
+    return this.width;
+  }
+
+  public serialize(l = 1) {
+    return { anything: true };
+  }
+
+  public updateSelectionAttributes(): void {
+    // pass
+  }
+
+  public updateConformance(confValue: number): void {
+    this.conformance = new Array(this.activity.length).fill(confValue);
+  }
+}
+
+export class WildcardNode extends VariantElement {
+  public activity: string[];
+
+  constructor(
+    performance: any = undefined,
+    public conformance: number[] = undefined,
+    public id: number = undefined
+  ) {
+    super(performance);
+    this.activity = ['WILDCARD'];
+  }
+
+  public textLength = 10;
+
+  public getActivities(): Set<string> {
+    return new Set<string>(this.activity);
+  }
+
+  public renameActivity(activityName: string, newActivityName: string) {
+    this.activity = this.activity.map((a) => {
+      return a === activityName ? newActivityName : a;
+    });
+  }
+
+  public deleteActivity(activityName: string): [VariantElement[], boolean] {
+    if (this.activity.includes(activityName)) {
+      if (this.activity.length > 1) {
+        return [[this], true];
+      } else {
+        return [null, false];
+      }
+    }
+
+    return [[this], false];
+  }
+
+  public asString(): string {
+    return this.activity.join(';');
+  }
+
+  public getHeight(): number {
+    this.height =
+      this.activity.length *
+      (VARIANT_Constants.FONT_SIZE + 2 * VARIANT_Constants.MARGIN_Y);
+    return this.height;
+  }
+
+  public getWidth(
+    includeWaiting = false,
+    full_text_width: boolean = false
+  ): number {
+    if (this.width) {
+      return this.width;
+    }
+    if (this.expanded || includeWaiting) {
+      if (this.activity.length > 1) {
+        this.width =
+          VARIANT_Constants.LEAF_WIDTH_EXPANDED + 2 * this.getHeadLength();
+      } else {
+        this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+      }
+    } else if (full_text_width) {
+      this.width = this.activity[0].length * VARIANT_Constants.CHAR_WIDTH;
+    } else {
+      this.width = VARIANT_Constants.LEAF_WIDTH;
+    }
+    this.width += VARIANT_Constants.MARGIN_X;
+
+    this.width = Math.max(
+      this.width * 0.75 + this.getHeadLength() * 2,
+      this.width - this.getHeadLength() * 2
+    );
+    return this.width;
+  }
+
+  public updateWidth() {}
+
+  public recalculateHeight(): number {
+    this.height = VARIANT_Constants.LEAF_HEIGHT;
+    return this.height;
+  }
+
+  public copy(): WildcardNode {
+    const res = new WildcardNode([...this.activity]);
+    res.expanded = this.expanded;
+    return res;
+  }
+
+  public recalculateWidth(): number {
+    if (this.expanded) {
+      this.width = VARIANT_Constants.LEAF_WIDTH_EXPANDED;
+    } else {
+      this.width = VARIANT_Constants.LEAF_WIDTH;
+    }
+    //this.width += VARIANT_Constants.MARGIN_X;
+    return this.width;
+  }
+
+  public serialize(l = 1) {
+    return { wildcard: true };
+  }
+
+  public updateSelectionAttributes(): void {
+    // pass
+  }
+
+  public updateConformance(confValue: number): void {
+    this.conformance = new Array(this.activity.length).fill(confValue);
   }
 }
 

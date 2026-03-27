@@ -11,13 +11,13 @@ def get_variant(variant: Tuple[Group, List[Trace], List, VariantInformation]) ->
 
 
 def get_traces(
-    variant: Tuple[Group, List[Trace], List, VariantInformation]
+    variant: Tuple[Group, List[Trace], List, VariantInformation],
 ) -> List[Trace]:
     return variant[1]
 
 
 def get_variant_info(
-    variant: Tuple[Group, List[Trace], List, VariantInformation]
+    variant: Tuple[Group, List[Trace], List, VariantInformation],
 ) -> List[Trace]:
     return variant[3]
 

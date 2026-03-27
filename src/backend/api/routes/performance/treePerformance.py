@@ -112,7 +112,7 @@ async def calculate_variant_performance(d: InputCalculatePerformance):
                 del cache.pcache[tree_cache_key][bid]
 
     for bid in d.variants:
-        (_, traces, _, info) = cache.variants[bid]
+        _, traces, _, info = cache.variants[bid]
         if info.is_user_defined:
             continue
         if tree_cache_key in cache.pcache and bid in cache.pcache[tree_cache_key]:

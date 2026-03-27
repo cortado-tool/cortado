@@ -327,7 +327,7 @@ def handle_rename_merge_variants(
     mergeList, activityName, newActivityName, new_variant_dict, update_res_variants
 ):
     for ls in mergeList:
-        (variant, _, _, info) = cache.variants[ls[0]]
+        variant, _, _, info = cache.variants[ls[0]]
         renamed_variant = rename_activities_in_variant_group(
             variant, activityName, newActivityName
         )
@@ -347,7 +347,7 @@ def handle_rename_merge_variants(
         are_all_user_defined = True
 
         for bid in ls:
-            (_, traces, sv, info) = cache.variants[bid]
+            _, traces, sv, info = cache.variants[bid]
 
             are_all_user_defined &= info.is_user_defined
 
@@ -382,7 +382,7 @@ def handle_rename_single_variant(
     renameList, activityName, newActivityName, new_variant_dict, update_res_variants
 ):
     for bid in renameList:
-        (variant, traces, subvariants, info) = cache.variants[bid]
+        variant, traces, subvariants, info = cache.variants[bid]
 
         renamed_variant = rename_activities_in_variant_group(
             variant, activityName, newActivityName
@@ -597,14 +597,14 @@ def remove_activities(
 
 def handle_merge_members(activityName, merge_list, new_variants, update_res_variants):
     for ls in merge_list:
-        (variant, _, _, _) = cache.variants[ls[0]]
+        variant, _, _, _ = cache.variants[ls[0]]
         new_variant = remove_activitiy_from_group(variant, activityName)
 
         new_traces = []
         new_subvariants = defaultdict(list)
 
         for bid in ls:
-            (_, traces, sv, info) = cache.variants[bid]
+            _, traces, sv, info = cache.variants[bid]
             new_traces += [apply_filter_copy(trace, activityName) for trace in traces]
             new_sv = remove_activitiy_from_subvariant(sv, activityName)
 
@@ -664,7 +664,7 @@ def handle_fallthrough(activityName, fallthrough, new_variants, update_res_varia
     if len(fallthrough) > 0:
         cLog = []
         for bid in fallthrough:
-            (_, traces, _, _) = cache.variants[bid]
+            _, traces, _, _ = cache.variants[bid]
             cLog.extend([apply_filter_copy(trace, activityName) for trace in traces])
 
         log = EventLog(cLog)

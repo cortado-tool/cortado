@@ -1,0 +1,99 @@
+<app-zoom-field [zoomScale]="[0.1, 3]">
+  <svg
+    #content
+    #treeSvg
+    class="tree-svg"
+    *ngIf="rootNode"
+    preserveAspectRatio="xMinYMin meet">
+    <!-- Draw nodes and connections recursively -->
+    <g class="tree-content" (click)="closeMenu()">
+      <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: rootNode }"></ng-container>
+
+      <!-- Node template -->
+      <ng-template #nodeTemplate let-node="node">
+        <!-- Draw connections to children -->
+        <g *ngIf="node.children && node.children.length > 0">
+          <line 
+            *ngFor="let child of node.children"
+            [attr.x1]="node.x + 30"
+            [attr.y1]="node.y"
+            [attr.x2]="child.x - 30"
+            [attr.y2]="child.y"
+            class="connection-line"
+          />
+        </g>
+
+        <!-- Draw the node itself -->
+        <g class="node-group" (click)="onNodeClick(node, $event)">
+        <g *ngIf="showPreviews && node.type === 'query' && node.variantElement" 
+           class="preview-container">
+          <g [attr.transform]="getPreviewTransform(node)">
+            <svg 
+                class="query-preview"
+                appVariantDrawer
+                [variant]="{ variant: getCollapsedVariantCopy(node) }"
+                [computeActivityColor]="computeActivityColor"
+                [traceInfixSelectionMode]="false"
+                [keepStandardView]="true"
+                [addCursorPointer]="false"
+                pointer-events="none">
+            </svg>
+          </g>
+        </g>
+        
+        <!-- Node circle (rendered second, so it's on top) -->
+        <circle
+          [attr.cx]="node.x"
+          [attr.cy]="node.y"
+          [attr.r]="30"
+          [attr.class]="'node node-' + node.type + (node.type === 'query' && currentEditingQueryId === node.queryId ? ' selected' : '')"
+        />
+        
+        <!-- Node label -->
+        <text
+          [attr.x]="node.x"
+          [attr.y]="node.y"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          class="node-label"
+          pointer-events="none"
+          >
+            {{ getNodeLabel(node.type) }}
+          </text>
+        </g>
+
+        <!-- Render children recursively -->
+        <ng-container *ngIf="node.children">
+          <ng-container *ngFor="let child of node.children">
+            <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: child }"></ng-container>
+          </ng-container>
+        </ng-container>
+      </ng-template>
+    </g>
+
+    <!-- Context Menu -->
+    <foreignObject x="0" y="0" width="100%" height="100%" style="pointer-events: none;">
+      <div 
+        class="menu" 
+        *ngIf="showMenu" 
+        [style.left.px]="menuX - 3" 
+        [style.top.px]="menuY / 2"
+        style="pointer-events: all;">
+        <button class="menu-item and-item" (click)="selectOperator('and')">
+          <span class="icon">∧</span>
+          <span class="label">AND</span>
+        </button>
+        
+        <button class="menu-item or-item" (click)="selectOperator('or')">
+          <span class="icon">∨</span>
+          <span class="label">OR</span>
+        </button>
+
+        <button class="menu-item query-item" (click)="selectOperator('query')">
+          <span class="icon"><i class="bi bi-search btn-icon"></i></span>
+          <span class="label">Query</span>
+        </button>
+      </div>
+    </foreignObject>
+  </svg>
+</app-zoom-field>

@@ -1,0 +1,106 @@
+<context-menu #contextMenu menuClass="custom-style">
+  <ng-template contextMenuItem [subMenu]="quickActionMenu">
+    <div>
+      <i class="bi bi-magic"></i>
+      Quick actions
+    </div>
+  </ng-template>
+
+  <context-menu #quickActionMenu>
+    <ng-template
+    contextMenuItem
+    (execute)="onMakeOptional($event)"
+    [disabled]="makeOptionalDisabled"
+    >
+    <div>
+      <i class="bi bi-question-circle"></i>
+      Make selection Optional
+    </div>
+    </ng-template>
+    <ng-template
+      contextMenuItem
+      (execute)="onMakeRepeatable($event)"
+      [disabled]="makeRepeatableDisabled"
+    >
+      <div>
+        <i class="bi bi-repeat"></i>
+        Make selection Loop
+      </div>
+    </ng-template>
+    <ng-template
+      contextMenuItem
+      (execute)="onMakeChoice($event)"
+      [disabled]="makeChoiceDisabled"
+    >
+      <div>
+        <i class="bi bi-list"></i>
+        Make selection Choice
+      </div>
+    </ng-template>
+    <ng-template
+      contextMenuItem
+      (execute)="onMakeFallthrough($event)"
+      [disabled]="makeFallthroughDisabled"
+    >
+      <div>
+        <i class="bi bi-arrow-left-right"></i>
+        Make selection Fallthrough
+      </div>
+    </ng-template>
+    <ng-template
+      contextMenuItem
+      (execute)="onAddWildcard($event)"
+      [disabled]="makeWildcardDisabled"
+    >
+      <div>
+        <i class="bi bi-star-fill"></i>
+        Add WILDCARD
+      </div>
+    </ng-template>
+    <ng-template
+      contextMenuItem
+      (execute)="onAddAnythingOperator($event)"
+      [disabled]="makeAnythingOperatorDisabled"
+    >
+      <div>
+        <i class="bi bi-three-dots"></i>
+        Add Anything Operator
+      </div>
+    </ng-template>
+    <ng-template
+      contextMenuItem
+      (execute)="onAddStartOperator($event)"
+      [disabled]="makeStartOperatorDisabled"
+    >
+      <div>
+        <i class="bi bi-play"></i>
+        Add Start Operator
+      </div>
+    </ng-template>
+    <ng-template
+      contextMenuItem
+      (execute)="onAddEndOperator($event)"
+      [disabled]="makeEndOperatorDisabled"
+    >
+      <div>
+        <i class="bi bi-stop"></i>
+        Add End Operator
+      </div>
+    </ng-template>
+  </context-menu>
+
+  <ng-template
+    contextMenuItem
+    (execute)="onDelete($event)"
+    [disabled]="deleteDisabled"
+    let-value
+  >
+    <div>
+      <i
+        class="bi bi-trash"
+        [ngClass]="!deleteDisabled(value) ? 'text-warning' : ''"
+      ></i>
+      Delete
+    </div>
+  </ng-template>
+</context-menu>
