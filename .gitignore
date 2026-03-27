@@ -26,3 +26,5 @@ app-dist
 .sol
 
 event_log.p
+
+*.xes
