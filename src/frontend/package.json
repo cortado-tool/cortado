@@ -39,7 +39,7 @@
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --port 4444 --configuration browser",
+    "start": "ng serve --host 0.0.0.0 --port 4444 --configuration browser",
     "start-electron-dev": "ng serve --port 4444",
     "start-electron-prod": "ng serve --configuration production --port 4444",
     "build": "ng build",

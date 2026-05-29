@@ -12,12 +12,15 @@ from pm4py.objects.log.util.interval_lifecycle import to_interval
 from pm4py.util.xes_constants import DEFAULT_START_TIMESTAMP_KEY, DEFAULT_TRANSITION_KEY
 from backend_utilities.multiprocessing.pool_factory import PoolFactory
 
+import pickle
+
 
 def calculate_event_log_properties(
     event_log: EventLog, time_granularity: TimeUnit = None, use_mp: bool = False
 ):
     if time_granularity is None:
         time_granularity = min(TimeUnit)
+        # time_granularity = TimeUnit.SEC
 
     cache.parameters["cur_time_granularity"] = time_granularity
 
@@ -57,10 +60,10 @@ def calculate_event_log_properties(
 
     cache.parameters["nBids"] = len(cache.variants.keys())
 
-    # pickle.dump(cache.variants,  open( "./resources/variants.p", "wb" ))
-    # pickle.dump(cache.parameters,  open( "./resources/parameters.p", "wb" ))
+    pickle.dump(cache.variants,  open( "src/backend/resources/variants.p", "wb" ))
+    pickle.dump(cache.parameters,  open( "src/backend/resources/parameters.p", "wb" ))
 
-    return res
+    return res, cache.variants
 
 
 def compute_log_stats(variants: Mapping[int, Tuple[Group, Trace]]):
@@ -113,6 +116,7 @@ def variants_to_variant_objects(
 
     for bid, (v, ts) in enumerate(
         sorted(list(variants.items()), key=lambda e: len(e[1]), reverse=True)
+        # list(variants.items())
     ):
         info: VariantInformation = info_generator(ts)
         v.infix_type = info.infix_type

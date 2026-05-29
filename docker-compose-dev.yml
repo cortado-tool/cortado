@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: ./src/backend
+      #args:
+      #  HTTP_PROXY:  http://172.17.0.1:3131
+      #  HTTPS_PROXY: http://172.17.0.1:3131
+      #  NO_PROXY:    "localhost,127.0.0.1,::1,backend,frontend"
+    ports:
+      - "40000:40000"
+    environment:
+      - CORTADO_DEBUG=1
+      #- HTTP_PROXY=http://172.17.0.1:3131
+      #- HTTPS_PROXY=http://172.17.0.1:3131
+      #- NO_PROXY=localhost,127.0.0.1,::1,backend,frontend
+    volumes:
+      - ./src/backend:/app
+    # если backend слушает не 0.0.0.0, надо поправить в коде/настройках
+    # command: ["python", "main.py"]
+
+  frontend:
+    build:
+      context: ./src/frontend
+      #args:
+      #  HTTP_PROXY:  http://172.17.0.1:3131
+      #  HTTPS_PROXY: http://172.17.0.1:3131
+      #  NO_PROXY:    "localhost,127.0.0.1,::1,backend,frontend"
+    ports:
+      - "4444:4444"
+    environment:
+      # Чтобы hot-reload работал в контейнере на некоторых сборках
+      - CHOKIDAR_USEPOLLING=true
+      #- HTTP_PROXY=http://172.17.0.1:3131
+      #- HTTPS_PROXY=http://172.17.0.1:3131
+      #- NO_PROXY=localhost,127.0.0.1,::1,backend,frontend
+      # если фронт ходит в backend по URL, обычно надо прокинуть переменную:
+      # - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./src/frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend

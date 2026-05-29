@@ -650,7 +650,7 @@ export class BackendService {
   public sortInVariantModeler(variant: VariantElement) {
     const variants = variant.serialize();
     return this.httpClient.post(
-      ROUTES.BASE_URL + ROUTES.VARIANT + 'sortvariant',
+      ROUTES.HTTP_BASE_URL + ROUTES.VARIANT + 'sortvariant',
       {
         variants,
       }

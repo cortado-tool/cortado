@@ -86,10 +86,14 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    import os
+    os.environ["CORTADO_DEBUG"] = "1"
+
     # print(DEFAULT_LP_SOLVER_VARIANT)
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
+        # host="127.0.0.1",
         port=args.WEBSERVER_PORT,
         workers=1,
         reload=CORTADO_DEBUG,

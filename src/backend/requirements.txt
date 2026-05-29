@@ -10,3 +10,4 @@ websockets
 cortado_core @git+https://github.com/juliusbrehme/cortado-core.git@main
 cvxopt
 pyinstaller~=6.6.0
+pandas

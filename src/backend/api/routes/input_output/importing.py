@@ -12,6 +12,11 @@ from endpoints.load_event_log import calculate_event_log_properties
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
+import pandas as pd
+import pm4py
+from pm4py import format_dataframe
+from pm4py import write_xes
+
 router = APIRouter(tags=["importing"], prefix="/importing")
 
 
@@ -24,15 +29,114 @@ async def load_event_log_from_file(
     file: UploadFile = File(...),
     config_repo: ConfigurationRepository = Depends(get_config_repo),
 ):
+    '''
+    Extension for importing Event Log from CSV file.
+    Requirements to CSV file:
+    First row should contain columns names responsible for values:
+        first column - case_id
+        second column - timestamp_key
+        third column - activity_key
+        other columns can be any
+    Columns names itself can be any value, only order is important.
+    timestamp_key should be in '2024-07-09 19:47:53.221' format 
+    where milliseconds are optional.
+    During import .xes file is created in src/backend 
+    that can be used for future import instead of .csv.
+    CSV separator is ';' by default in local variable sep = ";"
+    '''
     cache.pcache = {}
 
-    content = "".join([line.decode("UTF-8") for line in file.file])
-    event_log = xes_importer.deserialize(content)
+    if file.filename[len(file.filename) - 4:] == ".csv":
+        content_str_list = [line.decode("UTF-8") for line in file.file]
+        content_list = []
+        sep = ";"
+        for str_ in content_str_list:
+            str_ = str_.replace('"', '')
+            str_list = str_.strip().split(sep)
+            content_list.append(str_list)
+        df = pd.DataFrame(content_list[1:], columns=content_list[:1][0])
+        datetime_col_len = len(df.iloc[0:1, 1:2].iloc[0].iloc[0])
+        datetime_len = 23 # 2024-07-09 19:47:53.221
+        if datetime_col_len < datetime_len:
+            datetime_len = datetime_col_len
+        df[df.columns[1]] = df[df.columns[1]].apply(lambda x: x[0:datetime_len]).astype('datetime64[ns]')
+        event_log_df = format_dataframe(df, case_id=df.columns[0], timestamp_key=df.columns[1], activity_key=df.columns[2])
+        file_new = file.filename[0:len(file.filename) - 4] + '.xes'
+        write_xes(event_log_df, file_new)
+        event_log = xes_importer.apply(file_new)
+    else:
+        content = "".join([line.decode("UTF-8") for line in file.file])
+        event_log = xes_importer.deserialize(content)
     use_mp = (
         len(event_log) > config_repo.get_configuration().min_traces_variant_detection_mp
     )
-    info = calculate_event_log_properties(event_log, use_mp=use_mp)
+    info, var_details = calculate_event_log_properties(event_log, use_mp=use_mp)
     return info
+
+
+@router.post("/loadEventLogFromFile_Vars")  # сделал как тест, не используею пока
+async def load_event_log_from_file1(
+    file: UploadFile = File(...),
+    config_repo: ConfigurationRepository = Depends(get_config_repo),
+):
+    '''
+    Extension for importing Event Log from CSV file.
+    Requirements to CSV file:
+    First row should contain columns names responsible for values:
+        first column - case_id
+        second column - timestamp_key
+        third column - activity_key
+        other columns can be any
+    Columns names itself can be any value, only order is important.
+    timestamp_key should be in '2024-07-09 19:47:53.221' format 
+    where milliseconds are optional.
+    During import .xes file is created in src/backend 
+    that can be used for future import instead of .csv.
+    CSV separator is ';' by default in local variable sep = ";"
+    '''
+    cache.pcache = {}
+
+    if file.filename[len(file.filename) - 4:] == ".csv":
+        content_str_list = [line.decode("UTF-8") for line in file.file]
+        content_list = []
+        sep = ";"
+        for str_ in content_str_list:
+            str_ = str_.replace('"', '')
+            str_list = str_.strip().split(sep)
+            content_list.append(str_list)
+        df = pd.DataFrame(content_list[1:], columns=content_list[:1][0])
+        datetime_col_len = len(df.iloc[0:1, 1:2].iloc[0].iloc[0])
+        datetime_len = 23 # 2024-07-09 19:47:53.221
+        if datetime_col_len < datetime_len:
+            datetime_len = datetime_col_len
+        df[df.columns[1]] = df[df.columns[1]].apply(lambda x: x[0:datetime_len]).astype('datetime64[ns]')
+        event_log_df = format_dataframe(df, case_id=df.columns[0], timestamp_key=df.columns[1], activity_key=df.columns[2])
+        file_new = file.filename[0:len(file.filename) - 4] + '.xes'
+        write_xes(event_log_df, file_new)
+        event_log = xes_importer.apply(file_new)
+    else:
+        content = "".join([line.decode("UTF-8") for line in file.file])
+        event_log = xes_importer.deserialize(content)
+    use_mp = (
+        len(event_log) > config_repo.get_configuration().min_traces_variant_detection_mp
+    )
+    info, var_details = calculate_event_log_properties(event_log, use_mp=use_mp)
+
+    vars_leafs = []
+    seq_grs = []
+    attrs = []
+
+    for v in info['variants']:
+        vars_leafs.append(v['variant']['follows'])
+
+    for seq_gr in var_details.items():
+        seq_grs.append(seq_gr[1])
+
+    for sg in seq_grs:
+        attrs.append(sg[1])
+
+    res = {'vars_leafs': vars_leafs, 'attrs': attrs}
+    return res
 
 
 class FilePathInput(BaseModel):
@@ -54,7 +158,7 @@ async def load_event_log_from_file_path(
     use_mp = (
         len(event_log) > config_repo.get_configuration().min_traces_variant_detection_mp
     )
-    info = calculate_event_log_properties(event_log, use_mp=use_mp)
+    info, var_details = calculate_event_log_properties(event_log, use_mp=use_mp)
     return info
 
 

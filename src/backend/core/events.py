@@ -22,13 +22,15 @@ def create_start_app_handler(
                 open("./_internal/resources/parameters.p", "rb")
             )
         else:
-            cache.variants = pickle.load(open("./resources/variants.p", "rb"))
-            cache.parameters = pickle.load(open("./resources/parameters.p", "rb"))
+            #/home/ADMSK/ayisayev1/Downloads/AI/Code/cortado-main/src/backend/resources/variants.p
+            #src/backend/resources/variants.p
+            cache.variants = pickle.load(open("src/backend/resources/variants.p", "rb"))
+            cache.parameters = pickle.load(open("src/backend/resources/parameters.p", "rb"))
 
         # create process pool
         PoolFactory.instance()
 
-        print("loaded parameters", cache.parameters)
+        # print("loaded parameters", cache.parameters)
 
     return start_app
 

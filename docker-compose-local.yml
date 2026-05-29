@@ -1,0 +1,16 @@
+services:
+  backend:
+    image: cortado-backend:1.0
+    volumes:
+      - ./src/backend/resources:/app/src/backend/resources
+    ports:
+      - "40000:40000"
+    environment:
+      - CORTADO_DEBUG=0
+
+  frontend:
+    image: cortado-frontend:1.0
+    ports:
+      - "4444:4444"
+    depends_on:
+      - backend

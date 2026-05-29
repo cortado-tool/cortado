@@ -1,4 +1,11 @@
 export class ROUTES {
+  //public static BASE_URL = location.host + '/';
+  //public static HTTP_BASE_URL = '/api/';
+  //public static WS_HTTP_BASE_URL =
+  //  (location.protocol === 'https:' ? 'wss://' : 'ws://') +
+  //  this.BASE_URL + 'ws/';
+  
+  //public static BASE_URL = '11.62.16.121:40000/';
   public static BASE_URL = '127.0.0.1:40000/';
   public static HTTP_BASE_URL = 'http://' + this.BASE_URL;
   public static WS_HTTP_BASE_URL = 'ws://' + this.BASE_URL;

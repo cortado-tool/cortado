@@ -22,9 +22,9 @@ export class InitService {
   ) {}
 
   init = async () => {
-    let port = await this.electronService.getWSPort();
-    console.log('got the port from electron API: ' + port);
-    this.changePort(port);
+    //let port = await this.electronService.getWSPort();
+    //console.log('got the port from electron API: ' + port);
+    //this.changePort(port);
 
     return this.backendService
       .getInfo()
@@ -35,6 +35,7 @@ export class InitService {
 
   changePort(port: number) {
     ROUTES.BASE_URL = '127.0.0.1:' + port + '/';
+    //ROUTES.BASE_URL = '11.62.16.121:' + port + '/';
     ROUTES.HTTP_BASE_URL = 'http://' + ROUTES.BASE_URL;
     ROUTES.WS_HTTP_BASE_URL = 'ws://' + ROUTES.BASE_URL;
   }

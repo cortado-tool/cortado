@@ -23,7 +23,7 @@ async def get_event_log_properties(params: PropertiesParams):
     traces = list(itertools.chain(*[ts for _, (_, ts, _, _) in cache.variants.items()]))
     log = EventLog(traces, **cache.parameters["log_info"])
 
-    properties = calculate_event_log_properties(log, params.time_granularity)
+    properties, _ = calculate_event_log_properties(log, params.time_granularity)
     return properties
 
 
@@ -38,5 +38,5 @@ async def reset_log_cache():
         cache.variants = pickle.load(open("./_internal/resources/variants.p", "rb"))
         cache.parameters = pickle.load(open("./_internal/resources/parameters.p", "rb"))
     else:
-        cache.variants = pickle.load(open("./resources/variants.p", "rb"))
-        cache.parameters = pickle.load(open("./resources/parameters.p", "rb"))
+        cache.variants = pickle.load(open("src/backend/resources/variants.p", "rb"))
+        cache.parameters = pickle.load(open("src/backend/resources/parameters.p", "rb"))
