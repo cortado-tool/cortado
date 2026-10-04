@@ -1,5 +1,6 @@
 import os
 from multiprocessing import cpu_count, freeze_support
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI, HTTPException
@@ -12,7 +13,7 @@ from error_handlers import (
     exception_handler,
 )
 from api.routes.api import router as api_router
-from core.events import create_start_app_handler, create_stop_app_handler
+from core.events import start_app, stop_app
 from error_handlers import http_exception_handler, validation_exception_handler
 from middleware.http_middleware import http_middleware
 import argparse
@@ -20,24 +21,21 @@ import argparse
 CORTADO_DEBUG = os.getenv("CORTADO_DEBUG", "0") == "1"
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup code
+    await start_app()
+    yield
+    # Shutdown code
+    await stop_app()
+
+
 def get_application():
-    app = FastAPI()
-    add_event_handlers(app)
+    app = FastAPI(lifespan=lifespan)
     add_middleware(app)
     add_exception_handlers(app)
     app.include_router(api_router)
     return app
-
-
-def add_event_handlers(app: FastAPI):
-    app.add_event_handler(
-        "startup",
-        create_start_app_handler(app),
-    )
-    app.add_event_handler(
-        "shutdown",
-        create_stop_app_handler(app),
-    )
 
 
 def add_middleware(app: FastAPI):
