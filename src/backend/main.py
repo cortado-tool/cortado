@@ -5,6 +5,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 from error_handlers import (
     http_exception_handler,
@@ -21,23 +22,18 @@ CORTADO_DEBUG = os.getenv("CORTADO_DEBUG", "0") == "1"
 
 
 def get_application():
-    app = FastAPI()
-    add_event_handlers(app)
+    app = FastAPI(lifespan=lifespan)
     add_middleware(app)
     add_exception_handlers(app)
     app.include_router(api_router)
     return app
 
 
-def add_event_handlers(app: FastAPI):
-    app.add_event_handler(
-        "startup",
-        create_start_app_handler(app),
-    )
-    app.add_event_handler(
-        "shutdown",
-        create_stop_app_handler(app),
-    )
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_start_app_handler(app)()
+    yield
+    await create_stop_app_handler(app)()
 
 
 def add_middleware(app: FastAPI):
